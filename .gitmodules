@@ -1,0 +1,4 @@
+[submodule "clickbait17-validation"]
+	path = clickbait17-validation
+	url = https://github.com/mholdg16/clickbait17-validation.git
+	branch = master
