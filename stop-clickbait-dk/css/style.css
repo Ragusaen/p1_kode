@@ -1,0 +1,40 @@
+body {
+    font-family: Arial;
+    line-height: 1.5;
+    counter-reset: h1;
+}
+
+.post {
+    max-width: 560px;
+    margin: 0 auto 100px;
+}
+
+h1 {
+    position: relative;
+}
+
+h1:before {
+    counter-increment: h1;
+    content: "#" counter(h1);
+    position: absolute;
+    right: calc(100% + 1em);
+    text-align: right;
+    opacity: 0.2;
+    font-weight: normal;
+}
+
+h5 {
+    margin-bottom: -1em;
+}
+
+figure {
+    text-align: center;
+}
+img {
+    max-width: 100%;
+}
+figcaption {
+    font-size: 0.9em;
+    font-style: italic;
+    opacity: 0.5;
+}
