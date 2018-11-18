@@ -1,5 +1,12 @@
+#include "datapoint.h"
 
-typedef struct datapoint_t {
-    char* title;
+void datapoint_example(void) {
+    /* Some code */
+    _subfunction_of_a_datapoint_function();
+    return;
+}
 
-} datapoint_t;
+void _subfunction_of_a_datapoint_function(void) {
+    /* Some subfunction stuff */
+    return;
+}
