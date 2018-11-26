@@ -8,7 +8,7 @@ Programmeringsstils regler
   - Der benyttes altid "top-down programmering med trinvis forfinelse".
 
 ## Variabler
-  - Variabelnavn er i "snake case", f.eks. ```c some_variable_name ```.
+  - Variabelnavn er i "snake case", f.eks. `some_variable_name`.
   - Der vælges altid meningsfulde og hensigtsmæssige variabelnavne
   - Der må **ikke** benyttes globale variable. Hvis dette skulle friste, så overvej brug af pointers!
 
