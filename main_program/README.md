@@ -35,6 +35,7 @@ typedef struct SomeStruct {
     3. Deklarering af structs.
     4. Overfunktionsprototyper.
     5. Subfunktionsprototyper.
+
 Eksempel:
 ```c
 #ifndef HEADERNAME_H
