@@ -4,7 +4,7 @@ Programmeringsstils regler
 ## Generelle retningslinjer
   - Alle navne på funktioner og variabler samt sprog i kommentarer osv. foregår på engelsk.
   - Programmet skrives efter ISO standarden ANSI C (C89) (compile derfor med flags -ansi og -pedantic)
-  - De forskelige dele af programmet abstraheres væk i header filer med tilhørende .c filer.
+  - De forskellige dele af programmet abstraheres væk i header filer med tilhørende .c filer.
   - Der benyttes altid "top-down programmering med trinvis forfinelse".
 
 ## Variabler
@@ -19,10 +19,12 @@ Programmeringsstils regler
 ## Structs
   - Structs typedef(ines) altid til ét keyword.
   - Navnet skrives med PascalCase, f.eks.
-`typedef struct SomeStruct {
+```c 
+typedef struct SomeStruct {
   int some_int;
   char* some_string;
-} SomeStruct`
+} SomeStruct
+```
 
 ## Header filer
   - Hver header-fil indeholder header guards. `#ifndef HEADERFILE_H`, `#define HEADERFILE_H` og `#endif`.
