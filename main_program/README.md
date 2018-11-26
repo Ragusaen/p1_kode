@@ -11,6 +11,7 @@ Programmeringsstils regler
   - Variabelnavn er i "snake case", f.eks. `some_variable_name`.
   - Der vælges altid meningsfulde og hensigtsmæssige variabelnavne
   - Der må **ikke** benyttes globale variable. Hvis dette skulle friste, så overvej brug af pointers!
+  - Dereferencing operatoren skrives ved pointers altid sammenhængende med variblenavnet. F.eks. `char *some_pointer`.
 
 ## Funktioner
   - Funktionsnavne er i "snake case", feks. `void some_function_name( int some_var )`.
