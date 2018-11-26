@@ -23,7 +23,7 @@ Programmeringsstils regler
 typedef struct SomeStruct {
   int some_int;
   char* some_string;
-} SomeStruct
+} SomeStruct;
 ```
 
 ## Header filer
