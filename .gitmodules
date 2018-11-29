@@ -2,3 +2,6 @@
 	path = clickbait17-validation
 	url = https://github.com/mholdg16/clickbait17-validation.git
 	branch = master
+[submodule "clickbait-label-system"]
+	path = clickbait-label-system
+	url = https://github.com/mholdg16/clickbait-label-system.git
