@@ -1,5 +1,5 @@
 #include "clickbait_database.h"
-int import_csv(); {
+int import_csv() {
   /* Declare variables */
   Headlines *headlines;
   int i = 1;
@@ -41,7 +41,7 @@ return 1;
 /* Open the file and return it to main */
 FILE *open_file() {
   /* Åben databasen med clickbait headlines */
-  FILE *dataset = fopen("C:\\Programs\\MinGW\\hovedlinjer_test2.csv", "r");
+  FILE *dataset = fopen("headlines.csv", "r");
   /* Check om filen blev åbnet korrekt */
   if(dataset == NULL) {
     printf("\nError reading file.\n\n");
