@@ -1,18 +1,6 @@
 #include "functions_strings.h"
 
 
-int main(void) {
-  char kek[] = "YEET IN";
-  int kuk = 0;
-
-  kuk =laengste_ord(kek);
-  
-  printf("%d returned", kuk);
-  printf("%lf",gaennemsnit_laengde(kek));
-  printf("%d, bestemte ord", bestemte_ord(kek));
-
-}
-
 int laengste_ord(char str_in[]) {
 
   int ordlaengde = 0;
