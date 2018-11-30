@@ -1,3 +1,4 @@
+#include "clickbait_database.h"
 int import_csv(); {
   /* Declare variables */
   Headlines *headlines;
