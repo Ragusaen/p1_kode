@@ -11,15 +11,14 @@
 #include <stdlib.h>
 
 /* Include headers */
-#include "datapoint.h"
+#include "classifier.h"
+#include "headline.h"
+#include "features.h"
 
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {
 
-    /* This is only example code */
-    Datapoint dp = {"Hello World!", 0.0};
 
-    dp.clickbait_score += 10;
 
     return EXIT_SUCCESS;
 }
