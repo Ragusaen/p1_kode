@@ -17,24 +17,24 @@ int import_csv() {
 
   /* Allocate memory for the struct */
   if(dataset != NULL) {
-    headlines = (Headlines *)malloc(headlines_count * sizeof(Headlines));
-    if(headlines == NULL) {
-      printf("Failed to allocate memory. Have a pleasant day.\n");
-      exit(EXIT_FAILURE);
-    }
-    else {
-      printf("Memory allocated successfully.\n");
-    }
+      headlines = (Headlines *)malloc(headlines_count * sizeof(Headlines));
+      if(headlines == NULL) {
+          printf("Failed to allocate memory. Have a pleasant day.\n");
+          exit(EXIT_FAILURE);
+      }
+        else {
+          printf("Memory allocated successfully.\n");
+      }
   }
 
-  /* Rewind the file pointer */
-  rewind(dataset);
+      /* Rewind the file pointer */
+      rewind(dataset);
 
-  /* Import all data from the file and insert it to the struct */
-  read_headlines(dataset, headlines);
+      /* Import all data from the file and insert it to the struct */
+      read_headlines(dataset, headlines);
 
-printf("\n----------Import complete----------\n");
-return 1;
+    printf("\n----------Import complete----------\n");
+    return 1;
 }
 
 /* ---------- FUNCTIONS ---------- */

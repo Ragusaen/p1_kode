@@ -1,14 +1,14 @@
 #include "functions_strings.h"
 
 
-int laengste_ord(char str_in[]) {
+uint8_t laengste_ord(char str_in[]) {
 
   int ordlaengde = 0;
   int i = 0;
   char* str_laengde_pre = str_in,
         *str_laengde_post = str_in;
   char ord_endelser[] = " ,;!.:";
- 
+
   while (i == 0) {
     str_laengde_post = strpbrk(str_laengde_pre, ord_endelser);
 
@@ -19,7 +19,7 @@ int laengste_ord(char str_in[]) {
 
     if (ordlaengde < strlen(str_laengde_pre) - strlen(str_laengde_post)) {
       ordlaengde = strlen(str_laengde_pre) - strlen(str_laengde_post);
-    }  
+    }
     str_laengde_pre = str_laengde_post + 1;
   }
   return ordlaengde;
@@ -27,7 +27,7 @@ int laengste_ord(char str_in[]) {
 }
 
 double gaennemsnit_laengde(char str_in[]) {
-  
+
   int gennemsnit = 0;
   int i = 0;
   double sum = 0;
@@ -46,12 +46,12 @@ double gaennemsnit_laengde(char str_in[]) {
 
     sum += (double) strlen(str_laengde_pre) - strlen(str_laengde_post);
     ord++;
-    str_laengde_pre = str_laengde_post + 1; 
+    str_laengde_pre = str_laengde_post + 1;
   }
   return (double) sum / ord;
 
 }
-  
+
 
 
 int bestemte_ord(char str_in[]) {
