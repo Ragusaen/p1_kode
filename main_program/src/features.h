@@ -13,10 +13,9 @@ typedef struct Feature {
     uint8_t  (*has_feature)(char*);
 } Feature;
 
-uint8_t laengste_ord(char str_in[]);
-double gaennemsnit_laengde(char str_in[]);
-int bestemte_ord(char str_in[]);
-int samlet_laengde(char str_in[]);
-int ord_laengde(char str_in[]);
+uint8_t longest_word(char str_in[]);
+double average_length(char str_in[]);
+int special_words(char str_in[]);
+int total_length(char str_in[]);
 
 #endif

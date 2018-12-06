@@ -1,77 +1,78 @@
 #include "functions_strings.h"
 
 
-uint8_t laengste_ord(char str_in[]) {
+uint8_t longest_word(char str_in[]) {
 
-  int ordlaengde = 0;
+  int word_length = 0;
   int i = 0;
-  char* str_laengde_pre = str_in,
-        *str_laengde_post = str_in;
-  char ord_endelser[] = " ,;!.:";
+  char* str_length_pre = str_in,
+        *str_length_post = str_in;
+  char word_endings[] = " ,;!.:";
 
   while (i == 0) {
-    str_laengde_post = strpbrk(str_laengde_pre, ord_endelser);
+    str_length_post = strpbrk(str_length_pre, word_endings);
 
-    if (str_laengde_post == NULL) {
-      str_laengde_post = str_in + strlen(str_in);
+    if (str_length_post == 0) {
+      str_length_post = str_in + strlen(str_in);
       i = 1;
     }
 
-    if (ordlaengde < strlen(str_laengde_pre) - strlen(str_laengde_post)) {
-      ordlaengde = strlen(str_laengde_pre) - strlen(str_laengde_post);
+    if (word_length < strlen(str_length_pre) - strlen(str_length_post)) {
+      word_length = strlen(str_length_pre) - strlen(str_length_post);
     }
-    str_laengde_pre = str_laengde_post + 1;
+    str_length_pre = str_length_post + 1;
   }
-  return ordlaengde;
+  return word_length;
 
 }
 
-double gaennemsnit_laengde(char str_in[]) {
+double average_length(char str_in[]) {
 
-  int gennemsnit = 0;
+  int average = 0;
   int i = 0;
   double sum = 0;
-  double ord = 0;
-  char* str_laengde_pre = str_in,
-    *str_laengde_post = str_in;
-  char ord_endelser[] = " ,;!.:";
+  double words = 0;
+  char* str_length_pre = str_in,
+    *str_length_post = str_in;
+  char word_endings[] = " ,;!.:";
 
   while (i == 0) {
-    str_laengde_post = strpbrk(str_laengde_pre, ord_endelser);
+    str_length_post = strpbrk(str_length_pre, word_endings);
 
-    if (str_laengde_post == NULL) {
-      str_laengde_post = str_in + strlen(str_in);
+    if (str_length_post == 0) {
+      str_length_post = str_in + strlen(str_in);
       i = 1;
     }
 
-    sum += (double) strlen(str_laengde_pre) - strlen(str_laengde_post);
-    ord++;
-    str_laengde_pre = str_laengde_post + 1;
+    sum += (double) strlen(str_length_pre) - strlen(str_length_post);
+    words++;
+    str_length_pre = str_length_post + 1;
   }
-  return (double) sum / ord;
-
+  return (double) sum / words;
 }
 
 
 
-int bestemte_ord(char str_in[]) {
-  const char* ord[2];
-  ord[0] = "IN";
-  ord[1] = "YEET";
-  ord[3] = "YUUYT";
-  ord[4] = "YAATY";
-  ord[5] = "EYYYT";
-  int ord_maengde = 5;
-  int ord_score = 0;
+int special_words(char str_in[]) {
+  int words_amount = 5;
+  const char* words[words_amount];
+  words[0] = "IN";
+  words[1] = "YEET";
+  words[3] = "YUUYT";
+  words[4] = "YAATY";
+  words[5] = "EYYYT";
+  int word_score = 0;
   int i = 0;
 
-  for (i; i <= ord_maengde; i++) {
-    printf("YUET I %d \n", i);
-    if (strstr(str_in, ord[i]) != 0) {
-      printf("YT \n");
-      ord_score++;
+  for (i; i <= words_amount; i++) {
+    if (strstr(str_in, words[i]) != 0) {
+      word_score++;
     }
   }
-  return ord_score;
+  return word_score;
 
+}
+
+int total_length(char str_in[]){
+  return strlen(str_in);
 }
