@@ -9,7 +9,7 @@
 
 #include "features.h"
 
-/* Struct til headlinesne, der skal bearbejdes. */
+/* Struct for headlines for further processing */
 typedef struct Headline {
   char title[MAX_HEADLINE_LENGTH];
   int labeled_clickbait : 1;
