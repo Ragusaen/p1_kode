@@ -1,7 +1,6 @@
 #include "headline.h"
-int import_csv() {
+int import_csv(Headline headlines[], int *headline_count) {
     /* Declare variables */
-    Headline *headlines;
     int i = 1;
     int headlines_count = 0;
 
@@ -10,17 +9,12 @@ int import_csv() {
 
     /* Count the number of headlines */
     headlines_count = count_headlines(dataset);
-    printf("Number of headlines: %d", headlines_count);
 
     /* Allocate memory for the struct */
     if(dataset != NULL) {
         headlines = (Headline *)malloc(headlines_count * sizeof(Headline));
         if(headlines == NULL) {
-            printf("Failed to allocate memory. Have a pleasant day.\n");
            exit(EXIT_FAILURE);
-        }
-        else {
-          printf("Memory allocated successfully.\n");
         }
     }
 
@@ -30,7 +24,9 @@ int import_csv() {
     /* Import all data from the file and insert it to the struct */
     read_headlines(dataset, headlines);
 
-    printf("\n----------Import complete----------\n");
+    /* Return headlines_count to main */
+    headline_count = &headlines_count;
+
     return 1;
 }
 
@@ -64,7 +60,7 @@ void read_headlines(FILE *dataset, Headline headlines[]) {
     buf_clickbait[2],
     full_line[MAX_HEADLINE_LENGTH];
     char *section;
-    const char exclude_symbols[] = "\"";
+    const char exclude_symbols[] = ";";
     int i = 0;
     Headline headline;
 
