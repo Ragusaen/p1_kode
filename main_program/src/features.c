@@ -13,24 +13,14 @@ uint8_t longest_word(char str_in[]) {
         str_length_post = strpbrk(str_length_pre, word_endings);
 
         if (str_length_post == 0) {
-<<<<<<< HEAD
-            str_length_post = str_in + strlen(str_in);
-            i = 1;
-=======
           str_length_post = str_in + strlen(str_in);
           i = 1;
->>>>>>> 7ac722e409ba312ee3e623408e67cb1979dfdfd4
         }
 
         if (word_length < strlen(str_length_pre) - strlen(str_length_post)) {
             word_length = strlen(str_length_pre) - strlen(str_length_post);
         }
         str_length_pre = str_length_post + 1;
-<<<<<<< HEAD
-    }
-    return word_length;
-
-=======
     }
     if(word_length > MAX_WORD_LENGTH){
         return 0;
@@ -38,7 +28,6 @@ uint8_t longest_word(char str_in[]) {
     else{
         return 1;
     }
->>>>>>> 7ac722e409ba312ee3e623408e67cb1979dfdfd4
 }
 
 uint8_t average_length(char str_in[]) {
@@ -59,23 +48,15 @@ uint8_t average_length(char str_in[]) {
             i = 1;
         }
 
-<<<<<<< HEAD
-    sum += (double) strlen(str_length_pre) - strlen(str_length_post);
-    words++;
-    str_length_pre = str_length_post + 1;
-    }
-    return (double) sum / words;
-=======
         sum += (double) strlen(str_length_pre) - strlen(str_length_post);
         words++;
         str_length_pre = str_length_post + 1;
-    } 
+    }
     if(((double) sum / words) > MAX_AVERAGE_WORD_LENGTH){
     }
     else{
         return 1;
     }
->>>>>>> 7ac722e409ba312ee3e623408e67cb1979dfdfd4
 }
 
 
@@ -93,18 +74,8 @@ uint8_t special_words(char str_in[]) {
 
     for (i; i <= words_amount; i++) {
         if (strstr(str_in, words[i]) != 0) {
-<<<<<<< HEAD
             word_score++;
-        }
-    }
-    return word_score;
-}
-
-uint8_t total_length(char str_in[]){
-  return strlen(str_in);
-=======
-        word_score++;
-        break;
+            break;
         }
     }
     return is_word;
@@ -117,7 +88,6 @@ int total_length(char str_in[]){
     else{
         return 1;
     }
->>>>>>> 7ac722e409ba312ee3e623408e67cb1979dfdfd4
 }
 
 
