@@ -25,7 +25,13 @@ Feature *calculate_feature_array( Headline* headlines, uint16_t headline_count )
     if ( features == NULL )
         exit(EXIT_FAILURE);
 
-    features[0].has_feature = &laengste_ord;
+    features[0].has_feature = &longest_word;
+    features[1].has_feature = &special_words;
+    features[2].has_feature = &total_length;
+    features[3].has_feature = &has_cb_punctuation;
+    features[4].has_feature = &has_cb_hastag;
+    features[5].has_feature = &begins_with_number;
+
 
     for ( i = 0; i < headline_count; i++ ) {
         _add_feature_count( headlines[i], features );
