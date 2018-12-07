@@ -1,7 +1,6 @@
 #include "headline.h"
 int import_csv(Headline **headlines, int *headline_count, char *file_path) {
     /* Declare variables */
-    int i = 1;
     int headlines_count = 0;
 
     /* Open file with clickbait headlines */
