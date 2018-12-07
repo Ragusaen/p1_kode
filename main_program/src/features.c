@@ -12,18 +12,22 @@ uint8_t longest_word(char str_in[]) {
     while (i == 0) {
         str_length_post = strpbrk(str_length_pre, word_endings);
 
-      if (str_length_post == 0) {
+        if (str_length_post == 0) {
           str_length_post = str_in + strlen(str_in);
           i = 1;
-    }
+        }
 
-    if (word_length < strlen(str_length_pre) - strlen(str_length_post)) {
-        word_length = strlen(str_length_pre) - strlen(str_length_post);
+        if (word_length < strlen(str_length_pre) - strlen(str_length_post)) {
+            word_length = strlen(str_length_pre) - strlen(str_length_post);
+        }
+        str_length_pre = str_length_post + 1;
     }
-    str_length_pre = str_length_post + 1;
-  }
-    return word_length;
-
+    if(word_length > MAX_WORD_LENGTH){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }
 
 double average_length(char str_in[]) {
@@ -39,16 +43,20 @@ double average_length(char str_in[]) {
     while (i == 0) {
         str_length_post = strpbrk(str_length_pre, word_endings);
 
-    if (str_length_post == 0) {
-        str_length_post = str_in + strlen(str_in);
-        i = 1;
-    }
+        if (str_length_post == 0) {
+            str_length_post = str_in + strlen(str_in);
+            i = 1;
+        }
 
-    sum += (double) strlen(str_length_pre) - strlen(str_length_post);
-    words++;
-    str_length_pre = str_length_post + 1;
+        sum += (double) strlen(str_length_pre) - strlen(str_length_post);
+        words++;
+        str_length_pre = str_length_post + 1;
     } 
-    return (double) sum / words;
+    if(((double) sum / words) > MAX_AVERAGE_WORD_LENGTH){
+    }
+    else{
+        return 1;
+    }
 }
 
 
@@ -61,21 +69,27 @@ int special_words(char str_in[]) {
     words[3] = "YUUYT";
     words[4] = "YAATY";
     words[5] = "EYYYT";
-    int word_score = 0;
+    int is_word = 0;
     int i = 0;
 
     for (i; i <= words_amount; i++) {
         if (strstr(str_in, words[i]) != 0) {
         word_score++;
+        break;
         }
     }
-    return word_score;
-
+    return is_word;
 }
 
 int total_length(char str_in[]){
-  return strlen(str_in);
+    if(strlen(str_in) > MAX_TOTAL_LENGTH){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }
+
 
 /* Alternativ, hvis der onskes tjekke for om en hvis maengde er tilstede i beskeden udskift if else i funktionen med nederstaaende*/
 /*
