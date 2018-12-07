@@ -4,6 +4,7 @@
 #define FEATURE_COUNT 5
 
 #include <stdint.h>
+#include <string.h>
 
 typedef struct Feature {
     double   prob_cb_given_feature;
