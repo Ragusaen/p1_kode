@@ -17,8 +17,8 @@ typedef struct Headline {
   int feature_vector : FEATURE_COUNT;
 } Headline;
 
-FILE *open_file();
+FILE *open_file(char *file_path);
 int count_headlines(FILE *dataset);
-void read_headlines(FILE *dataset, Headline headlines[]);
+void read_headlines(FILE *dataset, Headline *headlines);
 
 #endif

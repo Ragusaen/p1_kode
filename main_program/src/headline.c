@@ -32,7 +32,7 @@ int import_csv(Headline **headlines, int *headline_count, char *file_path) {
 
 /* ---------- FUNCTIONS ---------- */
 /* Open the file and return it to main */
-FILE *open_file( char *file_path_str ) {
+FILE *open_file(char *file_path_str) {
     /* Open file with clickbait headlines */
     FILE *dataset = fopen( file_path_str, "r");
     /* Check if the file was opened correctly */
