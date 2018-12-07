@@ -37,7 +37,7 @@ FILE *open_file(char *file_path_str) {
     FILE *dataset = fopen(file_path_str, "r");
     /* Check if the file was opened correctly */
     if(dataset == NULL) {
-        printf("\nError reading file.\n\n");
+        printf("\nError opening file.\n\n");
         exit(1);
     }
     return dataset;
