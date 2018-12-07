@@ -1,19 +1,19 @@
 #include "headline.h"
-int import_csv(Headline headlines[], int *headline_count) {
+int import_csv(Headline **headlines, int *headline_count, char *file_path) {
     /* Declare variables */
     int i = 1;
     int headlines_count = 0;
 
     /* Open file with clickbait headlines */
-    FILE *dataset = open_file();
+    FILE *dataset = open_file(file_path);
 
     /* Count the number of headlines */
     headlines_count = count_headlines(dataset);
 
     /* Allocate memory for the struct */
     if(dataset != NULL) {
-        headlines = (Headline *)malloc(headlines_count * sizeof(Headline));
-        if(headlines == NULL) {
+        *headlines = (Headline *)malloc(headlines_count * sizeof(Headline));
+        if(*headlines == NULL) {
            exit(EXIT_FAILURE);
         }
     }
@@ -22,7 +22,7 @@ int import_csv(Headline headlines[], int *headline_count) {
     rewind(dataset);
 
     /* Import all data from the file and insert it to the struct */
-    read_headlines(dataset, headlines);
+    read_headlines(dataset, *headlines);
 
     /* Return headlines_count to main */
     headline_count = &headlines_count;
@@ -32,9 +32,9 @@ int import_csv(Headline headlines[], int *headline_count) {
 
 /* ---------- FUNCTIONS ---------- */
 /* Open the file and return it to main */
-FILE *open_file() {
+FILE *open_file( char *file_path_str ) {
     /* Open file with clickbait headlines */
-    FILE *dataset = fopen("headlines.csv", "r");
+    FILE *dataset = fopen( file_path_str, "r");
     /* Check if the file was opened correctly */
     if(dataset == NULL) {
         printf("\nError reading file.\n\n");
@@ -55,7 +55,7 @@ int count_headlines(FILE *dataset) {
 }
 
 /* Read the file and insert it to the struct */
-void read_headlines(FILE *dataset, Headline headlines[]) {
+void read_headlines(FILE *dataset, Headline *headlines) {
     char buf_headline[MAX_HEADLINE_LENGTH],
     buf_clickbait[2],
     full_line[MAX_HEADLINE_LENGTH];
