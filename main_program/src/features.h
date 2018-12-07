@@ -1,5 +1,5 @@
-#ifndef FUNCTIONS_STRINGS_H
-#define FUNCTIONS_STRINGS_H
+#ifndef FEATURES_H
+#define FEATURES_H
 
 #define FEATURE_COUNT 5
 
