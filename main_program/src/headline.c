@@ -34,7 +34,7 @@ int import_csv(Headline **headlines, int *headline_count, char *file_path) {
 /* Open the file and return it to main */
 FILE *_open_file( char *file_path_str ) {
     /* Open file with clickbait headlines */
-    FILE *dataset = fopen( file_path_str, "r");
+    FILE *dataset = fopen(file_path_str, "r");
     /* Check if the file was opened correctly */
     if(dataset == NULL) {
         printf("Error reading file!\n");
