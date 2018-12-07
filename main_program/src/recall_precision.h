@@ -1,5 +1,5 @@
-#ifndef FUNCTIONS_STRINGS_H
-#define FUNCTIONS_STRINGS_H
+#ifndef RECALL_PRECISION_H
+#define RECALL_PRECISION_H
 
 #include <stdio.h>
 #include "headline.h"
