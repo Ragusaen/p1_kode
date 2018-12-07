@@ -2,9 +2,14 @@
 #define FEATURES_H
 
 #define FEATURE_COUNT 5
+#define MAX_WORD_LENGTH 8
+#define MAX_AVERAGE_WORD_LENGTH 6
+#define MAX_TOTAL_LENGTH 30 
+#define AMOUNT_OF_SPECIAL_WORDS 5
 
 #include <stdint.h>
 #include <string.h>
+
 
 typedef struct Feature {
     double   prob_cb_given_feature;
@@ -18,8 +23,5 @@ uint8_t longest_word(char str_in[]);
 double average_length(char str_in[]);
 int special_words(char str_in[]);
 int total_length(char str_in[]);
-int has_cb_punctuation(char str_in[]);
-int has_cb_hastag(char str_in[]);
-int begins_with_number(char str_in[]);
 
 #endif

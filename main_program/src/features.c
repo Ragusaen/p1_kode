@@ -1,5 +1,4 @@
-#include "functions_strings.h"
-
+#include "features.h"
 
 uint8_t longest_word(char str_in[]) {
 
@@ -62,19 +61,19 @@ double average_length(char str_in[]) {
 
 
 int special_words(char str_in[]) {
-    int words_amount = 5;
-    const char* words[words_amount];
+    int is_word = 0;
+    int i = 0;
+
+    char* words[AMOUNT_OF_SPECIAL_WORDS];
     words[0] = "IN";
     words[1] = "YEET";
     words[3] = "YUUYT";
     words[4] = "YAATY";
     words[5] = "EYYYT";
-    int is_word = 0;
-    int i = 0;
 
-    for (i; i <= words_amount; i++) {
+    for (i; i <= AMOUNT_OF_SPECIAL_WORDS; i++) {
         if (strstr(str_in, words[i]) != 0) {
-        word_score++;
+        is_word++;
         break;
         }
     }
