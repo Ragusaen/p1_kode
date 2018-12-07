@@ -1,4 +1,4 @@
-double recall(struct Headline *data_in, int data_amount){
+double recall(Headline *data_in, int data_amount){
 
     int i = 0;
     double clickbait_collected = 0;
@@ -15,7 +15,7 @@ double recall(struct Headline *data_in, int data_amount){
     return clickbait_collected / clickbait_labeled;
 }
 
-int precision(struct Headline *data_in, data_amount){
+int precision(Headline *data_in, data_amount){
     int i = 0;
     
     double clickbait_collected;
@@ -26,4 +26,4 @@ int precision(struct Headline *data_in, data_amount){
     }
     return clickbait_collected / data_amount;
 
-}
+} 
