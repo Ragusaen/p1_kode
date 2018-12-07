@@ -18,5 +18,8 @@ uint8_t longest_word(char str_in[]);
 double average_length(char str_in[]);
 int special_words(char str_in[]);
 int total_length(char str_in[]);
+int has_cb_punctuation(char str_in[]);
+int has_cb_hastag(char str_in[]);
+int begins_with_number(char str_in[]);
 
 #endif
