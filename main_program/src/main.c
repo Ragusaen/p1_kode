@@ -14,6 +14,7 @@
 #include "classifier.h"
 #include "headline.h"
 #include "features.h"
+#include "recall_precision.h"
 
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {

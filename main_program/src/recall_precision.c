@@ -12,7 +12,7 @@ double recall(struct Headline *data_in, int data_amount){
                 clickbait_labeled++;
           }
      }
-    return clickbait_collected / (sizeof(data_in.labeled_clickbait);
+    return clickbait_collected / clickbait_labeled;
 }
 
 int precision(struct Headline *data_in, data_amount){
