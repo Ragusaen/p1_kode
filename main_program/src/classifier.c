@@ -3,6 +3,7 @@
 void classify_array( Headline *headlines, uint16_t headline_count, Feature *features ) {
     uint16_t i;
     for ( i = 0; i < headline_count; i++ ) {
+        printf("%d: ", i);
         classify( headlines + i, features );
     }
 }
@@ -11,8 +12,10 @@ int classify( Headline *headline, Feature *features ) {
     double prob_cb;
 
     _set_feature_vector( headline, features );
+    printf("feature vector %d, ", headline->feature_vector);
 
     prob_cb = _calculate_cb_prob( *headline, features );
+    printf("cb prob: %lf\n", prob_cb);
 
     headline->classified_clickbait = ( prob_cb >= PROB_THRESHOLD )? 1: 0;
     return headline->classified_clickbait;
@@ -32,7 +35,6 @@ Feature *calculate_feature_array( Headline* headlines, uint16_t headline_count )
     features[4].has_feature = &has_cb_hastag;
     features[5].has_feature = &begins_with_number;
 
-
     for ( i = 0; i < headline_count; i++ ) {
         _add_feature_count( headlines[i], features );
     }
@@ -40,8 +42,13 @@ Feature *calculate_feature_array( Headline* headlines, uint16_t headline_count )
     for ( i = 0; i < FEATURE_COUNT; i++ ) {
         /* p(F) = |F|/|A| */
         features[i].prob_feature = (double)features[i].feature_count / headline_count;
-        /* p(CB|F) = |CB & F| / |F| */
-        features[i].prob_cb_given_feature = (double)features[i].feature_cb_count / features[i].feature_count;
+
+        if (features[i].feature_count > 0) {
+            /* p(CB|F) = |CB & F| / |F| */
+            features[i].prob_cb_given_feature = (double)features[i].feature_cb_count / features[i].feature_count;
+        } else {
+            features[i].prob_cb_given_feature = 1;
+        }
     }
 
     return features;
@@ -70,12 +77,12 @@ void _add_feature_count( Headline headline, Feature *features ) {
 
 double _calculate_cb_prob( Headline headline, Feature* features ) {
     double prob = 1;
-    uint8_t i;
+    int8_t i;
     for ( i = FEATURE_COUNT - 1; i >= 0; i-- ) {
         double pcbf = features[i].prob_cb_given_feature;
         double pf = features[i].prob_feature;
 
-        if ( headline.feature_vector % 2 ) { /* Only check first bit */
+        if ( headline.feature_vector % 2 == 1 ) { /* Only check first bit */
             prob *= pcbf;
         } else {
             prob *= ( 0.5 - pcbf * pf ) / ( 1 - pf );

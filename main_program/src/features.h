@@ -1,14 +1,15 @@
 #ifndef FEATURES_H
 #define FEATURES_H
 
-#define FEATURE_COUNT 5
+#define FEATURE_COUNT 6
 #define MAX_WORD_LENGTH 8
 #define MAX_AVERAGE_WORD_LENGTH 6
 #define MAX_TOTAL_LENGTH 30
-#define AMOUNT_OF_SPECIAL_WORDS 5
+#define AMOUNT_OF_SPECIAL_WORDS 6
 
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 
 

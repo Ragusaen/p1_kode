@@ -1,20 +1,18 @@
 #include "headline.h"
 
 int import_csv(Headline **headlines, int *headline_count, char *file_path) {
-    /* Declare variables */
-    int headlines_count = 0;
-
     /* Open file with clickbait headlines */
     FILE *dataset = _open_file(file_path);
 
     /* Count the number of headlines */
-    headlines_count = _count_headlines(dataset);
+    *headline_count = _count_headlines(dataset);
 
     /* Allocate memory for the struct */
     if(dataset != NULL) {
-        *headlines = (Headline *)malloc(headlines_count * sizeof(Headline));
+        *headlines = (Headline *)malloc(*headline_count * sizeof(Headline));
         if(*headlines == NULL) {
-           exit(EXIT_FAILURE);
+            printf("Error allocating memory for headlines!\n");
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -22,10 +20,7 @@ int import_csv(Headline **headlines, int *headline_count, char *file_path) {
     rewind(dataset);
 
     /* Import all data from the file and insert it to the struct */
-    _read_headlines(dataset, *headlines);
-
-    /* Return headlines_count to main */
-    headline_count = &headlines_count;
+    _read_headlines(dataset, *headlines, *headline_count);
 
     return 1;
 }
@@ -45,36 +40,38 @@ FILE *_open_file( char *file_path_str ) {
 
 /* Count the number of headlines and return it to main */
 int _count_headlines(FILE *dataset) {
-    char buf_count[MAX_HEADLINE_LENGTH];
-    int i = 0;
+    int lines = 0;
 
-    while(fgets(buf_count, MAX_HEADLINE_LENGTH, dataset)) {
-        i++;
+    while ( !feof(dataset) ) {
+        if ( fgetc(dataset) == '\n' )
+            lines++;
     }
-    return i;
+    return lines;
 }
 
 /* Read the file and insert it to the struct */
-void _read_headlines(FILE *dataset, Headline *headlines) {
-    char buf_headline[MAX_HEADLINE_LENGTH],
-    buf_clickbait[2],
-    full_line[MAX_HEADLINE_LENGTH];
-    char *section;
-    const char exclude_symbols[] = ";";
-    int i = 0;
-    Headline headline;
+void _read_headlines(FILE *dataset, Headline *headlines, int headline_count ) {
+    int i;
 
-    while(fgets(full_line, MAX_HEADLINE_LENGTH, dataset)) {
-        section = strtok(full_line, exclude_symbols);
-        if(section != NULL) {
-            strcpy(buf_headline, section);
-            section = strtok(NULL, exclude_symbols);
-            strcpy(buf_clickbait, (section + 1));
+    for ( i = 0; i < headline_count; i++ ) {
+        char buffer[FILE_BUFFER_LENGTH];
+        if ( fgets(buffer, FILE_BUFFER_LENGTH, dataset ) ) {
+            int j, cb_label = 0;
+            for (j=1; !(buffer[j-1] == '\"' && buffer[j] == ',') && j<FILE_BUFFER_LENGTH;j++);
+            buffer[j] = '\0';
+
+            headlines[i].title = (char*)malloc(j);
+            if ( headlines[i].title == NULL ) {
+                printf("Couldn't allocate memory for headline %d\n", i );
+                exit(EXIT_FAILURE);
+            }
+            strcpy( headlines[i].title, buffer );
+
+            sscanf(buffer + j + 1, " %d", &cb_label );
+            headlines[i].labeled_clickbait = cb_label;
+        } else {
+            printf("Couldn't read file line %d\n", i );
+            exit(EXIT_FAILURE);
         }
-        /* Add buffers to struct */
-        strcpy(headline.title, buf_headline);
-        headline.labeled_clickbait = atoi(buf_clickbait);
-        headlines[i] = headline;
-        i++;
     }
 }
