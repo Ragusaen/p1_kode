@@ -19,11 +19,11 @@ double recall(Headline *data_in, int data_amount) {
 }
 
 double precision(Headline *data_in, int data_amount) {
-    int i = 0;
+    int i;
     double clickbait_collected = 0;
     double clickbait_clasified = 0;
 
-    for (i; i < data_amount; i++){
+    for (i = 0; i < data_amount; i++){
          if(data_in[i].classified_clickbait == 1  && data_in[i].labeled_clickbait == 1){
                 clickbait_collected++;
         }

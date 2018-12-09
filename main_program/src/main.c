@@ -21,8 +21,6 @@ void print_classification( Headline *test_data, int test_count );
 
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {
-
-printf("Got here!");
     Headline *training_data;
     int training_count;
     Headline *test_data;

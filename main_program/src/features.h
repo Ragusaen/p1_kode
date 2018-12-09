@@ -1,18 +1,15 @@
 #ifndef FEATURES_H
 #define FEATURES_H
 
-<<<<<<< HEAD
 #define FEATURE_COUNT 5
 #define MAX_WORD_LENGTH 8
 #define MAX_AVERAGE_WORD_LENGTH 6
-#define MAX_TOTAL_LENGTH 30 
+#define MAX_TOTAL_LENGTH 30
 #define AMOUNT_OF_SPECIAL_WORDS 5
-=======
-#define FEATURE_COUNT 7
->>>>>>> 94163baee58c759447fdd046b34b4facd32e1424
 
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 
 typedef struct Feature {
@@ -24,17 +21,11 @@ typedef struct Feature {
 } Feature;
 
 uint8_t longest_word(char str_in[]);
-<<<<<<< HEAD
-double average_length(char str_in[]);
-int special_words(char str_in[]);
-int total_length(char str_in[]);
-=======
 uint8_t average_length(char str_in[]);
 uint8_t special_words(char str_in[]);
 uint8_t total_length(char str_in[]);
 uint8_t has_cb_punctuation(char str_in[]);
 uint8_t has_cb_hastag(char str_in[]);
 uint8_t begins_with_number(char str_in[]);
->>>>>>> 94163baee58c759447fdd046b34b4facd32e1424
 
 #endif
