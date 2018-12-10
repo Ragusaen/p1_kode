@@ -31,7 +31,6 @@ uint8_t longest_word(char str_in[]) {
 
 uint8_t average_length(char str_in[]) {
 
-    int average = 0;
     int i = 0;
     double sum = 0;
     double words = 0;
@@ -51,14 +50,11 @@ uint8_t average_length(char str_in[]) {
         words++;
         str_length_pre = str_length_post + 1;
     }
-    if(((double) sum / words) > MAX_AVERAGE_WORD_LENGTH){
-    }
-    else{
-        return 1;
-    }
+    return ((double) sum / words > MAX_AVERAGE_WORD_LENGTH);
 }
 
 
+<<<<<<< HEAD
 
 uint8_t special_words(char str_in[]) {
     int is_word = 0;
@@ -80,47 +76,37 @@ uint8_t special_words(char str_in[]) {
     words[14] = "så lidt";
     
     //please work
+=======
+uint8_t special_words(char str_in[]) {
+    int has_word = 0;
+    int i;
 
-    for (i; i <= AMOUNT_OF_SPECIAL_WORDS; i++) {
+    char* words[AMOUNT_OF_SPECIAL_WORDS];
+    words[0] = "sådan";
+    words[1] = "YEET";
+    words[2] = "WhoDis";
+    words[3] = "YUUYT";
+    words[4] = "YAATY";
+    words[5] = "EYYYT";
+>>>>>>> 262bbf398c56d7a1595aefff85fc53376fb68dca
+
+    for ( i = 0; i < AMOUNT_OF_SPECIAL_WORDS && !has_word; i++ ) {
         if (strstr(str_in, words[i]) != 0) {
+<<<<<<< HEAD
         is_word++;
         break;
+=======
+            has_word = 1;
+>>>>>>> 262bbf398c56d7a1595aefff85fc53376fb68dca
         }
     }
-    return is_word;
+    return has_word;
 }
 
-int total_length(char str_in[]){
-    if(strlen(str_in) > MAX_TOTAL_LENGTH){
-        return 0;
-    }
-    else{
-        return 1;
-    }
+uint8_t total_length(char str_in[]) {
+    return (strlen(str_in) > MAX_TOTAL_LENGTH);
 }
 
-
-/* Alternativ, hvis der onskes tjekke for om en hvis maengde er tilstede i beskeden udskift if else i funktionen med nederstaaende*/
-/*
-   const char ch = 'acharacter';
-   int toomuch =3;
-   int count =0;
-   int cb_something;
-   int i;
-
-   for(i =0; i <= strlen(str_in); i++) {
-       if(str_in[i] == ch){
-           count++;
-       }
-   }
-   if (count >= toomuch) {
-       cb_something =1;
-   }
-   else{
-       cb_something =0;
-   }
-*/
-   /* END */
 
 uint8_t has_cb_punctuation(char str_in[]) {
    const char ch = '.';
@@ -142,7 +128,7 @@ uint8_t begins_with_number(char str_in[]){
     int cb_number = 0, i;
 
     for(i = 0; i <= 3 && cb_number == 0; i++){
-        if(isdigit(str_in[i])) {
+        if(isdigit(str_in[i]) ) {
             cb_number = 1;
         }
     }
