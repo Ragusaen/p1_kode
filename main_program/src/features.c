@@ -45,7 +45,7 @@ uint8_t average_length(char str_in[]) {
         words++;
         str_length_pre = str_length_post + 1;
     }
-    return ((double) sum / words > MAX_AVERAGE_WORD_LENGTH);
+    return ( sum / words > MAX_AVERAGE_WORD_LENGTH);
 }
 
 
@@ -53,14 +53,16 @@ uint8_t average_length(char str_in[]) {
 uint8_t special_words(char str_in[]) {
     int has_word = 0;
     int i;
-
     char* words[AMOUNT_OF_SPECIAL_WORDS];
+
+
     words[0] = "Sådan";
     words[1] = "sådan";
-    words[3] = "Derfor";
-    words[4] = "derfor";
-    words[5] = "Denne";
-    words[6] = "denne";
+    words[2] = "Derfor";
+    words[3] = "derfor";
+    words[4] = "Denne";
+    words[5] = "denne";
+    words[6] = "anders kan ikke tælle!";
     words[7] = "Dette";
     words[8] = "Her";
     words[9] = "her";
@@ -68,6 +70,7 @@ uint8_t special_words(char str_in[]) {
     words[12] = "så meget";
     words[13] = "Så lidt";
     words[14] = "så lidt";
+
 
     for ( i = 0; i < AMOUNT_OF_SPECIAL_WORDS && !has_word; i++ ) {
         if (strstr(str_in, words[i]) != 0) {

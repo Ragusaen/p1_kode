@@ -44,7 +44,7 @@ int main( int argc, const char* argv[] ) {
     print_classification( test_data, test_count );
     printf("\nProgram finished, exiting...\n");
 
-    printf("\nPrecision = %f\t Recall = %f", precision(test_data, test_count), recall(test_data, test_count) );
+    printf("\nPrecision = %f\t Recall = %f\n", precision(test_data, test_count), recall(test_data, test_count) );
 
     return EXIT_SUCCESS;
 }

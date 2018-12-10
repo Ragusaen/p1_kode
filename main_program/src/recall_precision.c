@@ -20,17 +20,16 @@ double recall(Headline *data_in, int data_amount) {
 
 double precision(Headline *data_in, int data_amount) {
     int i;
-    double clickbait_collected = 0;
-    double clickbait_clasified = 0;
+    int clickbait_collected = 0, clickbait_clasified = 0;
 
     for (i = 0; i < data_amount; i++){
-         if(data_in[i].classified_clickbait == 1  && data_in[i].labeled_clickbait == 1){
-                clickbait_collected++;
-        }
-        if (data_in[i].labeled_clickbait == 1) {
+         if( data_in[i].labeled_clickbait ){
+            clickbait_collected++;
+
+            if ( data_in[i].classified_clickbait )
                 clickbait_clasified++;
         }
     }
-    return clickbait_collected / clickbait_clasified;
+    return (double)clickbait_clasified / clickbait_collected;
 
 }
