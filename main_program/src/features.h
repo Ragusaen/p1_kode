@@ -8,6 +8,7 @@
 #define AMOUNT_OF_SPECIAL_WORDS 7
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -28,5 +29,7 @@ uint8_t total_length(char str_in[]);
 uint8_t has_cb_punctuation(char str_in[]);
 uint8_t has_cb_hastag(char str_in[]);
 uint8_t begins_with_number(char str_in[]);
+
+char *str_lwr( char *str );
 
 #endif
