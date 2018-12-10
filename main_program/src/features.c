@@ -49,7 +49,6 @@ uint8_t average_length(char str_in[]) {
 }
 
 
-<<<<<<< HEAD
 
 uint8_t special_words(char str_in[]) {
     int is_word = 0;
@@ -69,30 +68,10 @@ uint8_t special_words(char str_in[]) {
     words[12] = "så meget";
     words[13] = "Så lidt";
     words[14] = "så lidt";
-    
-    //please work
-=======
-uint8_t special_words(char str_in[]) {
-    int has_word = 0;
-    int i;
-
-    char* words[AMOUNT_OF_SPECIAL_WORDS];
-    words[0] = "sådan";
-    words[1] = "YEET";
-    words[2] = "WhoDis";
-    words[3] = "YUUYT";
-    words[4] = "YAATY";
-    words[5] = "EYYYT";
->>>>>>> 262bbf398c56d7a1595aefff85fc53376fb68dca
 
     for ( i = 0; i < AMOUNT_OF_SPECIAL_WORDS && !has_word; i++ ) {
         if (strstr(str_in, words[i]) != 0) {
-<<<<<<< HEAD
-        is_word++;
-        break;
-=======
             has_word = 1;
->>>>>>> 262bbf398c56d7a1595aefff85fc53376fb68dca
         }
     }
     return has_word;
