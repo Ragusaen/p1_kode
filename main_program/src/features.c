@@ -58,13 +58,14 @@ uint8_t special_words(char str_in[]) {
         "sådan", "derfor", "denne", "dette", "her", "så meget", "så lidt"
     };
 
+    char *lower_string = str_lwr(str_in);
 
     for ( i = 0; i < AMOUNT_OF_SPECIAL_WORDS && !has_word; i++ ) {
-        if (strstr(strlwr(str_in), words[i]) != NULL) {
+        if (strstr(lower_string, words[i]) != NULL) {
             has_word = 1;
         }
     }
-
+    free(lower_string);
     return has_word;
 }
 
@@ -98,4 +99,14 @@ uint8_t begins_with_number(char str_in[]){
         }
     }
 	return cb_number;
+}
+
+char *str_lwr( char *str ) {
+
+    char* lwr = (char*)malloc( strlen(str) + 1);
+    int i;
+    for ( i = 0; i < strlen(str) + 1; i++ ) {
+        lwr[i] = tolower(str[i]);
+    }
+    return lwr;
 }
