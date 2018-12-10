@@ -58,14 +58,14 @@ void _read_headlines(FILE *dataset, Headline *headlines, int headline_count ) {
         if ( fgets(buffer, FILE_BUFFER_LENGTH, dataset ) ) {
             int j, cb_label = 0;
             for (j=1; !(buffer[j-1] == '\"' && buffer[j] == ',') && j<FILE_BUFFER_LENGTH;j++);
-            buffer[j] = '\0';
+            buffer[j-1] = '\0';
 
-            headlines[i].title = (char*)malloc(j);
+            headlines[i].title = (char*)malloc(j-1);
             if ( headlines[i].title == NULL ) {
                 printf("Couldn't allocate memory for headline %d\n", i );
                 exit(EXIT_FAILURE);
             }
-            strcpy( headlines[i].title, buffer );
+            strcpy( headlines[i].title, (buffer+1) );
 
             sscanf(buffer + j + 1, " %d", &cb_label );
             headlines[i].labeled_clickbait = cb_label;

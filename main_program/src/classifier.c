@@ -3,7 +3,7 @@
 void classify_array( Headline *headlines, uint16_t headline_count, Feature *features ) {
     uint16_t i;
     for ( i = 0; i < headline_count; i++ ) {
-        printf("%d: ", i);
+        printf("%d:\t", i);
         classify( headlines + i, features );
     }
 }
@@ -12,7 +12,7 @@ int classify( Headline *headline, Feature *features ) {
     double prob_cb;
 
     _set_feature_vector( headline, features );
-    printf("feature vector %d, ", headline->feature_vector);
+    printf("feature vector %d\t", headline->feature_vector);
 
     prob_cb = _calculate_cb_prob( *headline, features );
     printf("cb prob: %f\n", prob_cb);
