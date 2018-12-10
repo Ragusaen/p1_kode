@@ -31,6 +31,6 @@ double precision(Headline *data_in, int data_amount) {
                 clickbait_clasified++;
         }
     }
-    return clickbait_collected / clickbait_clasified;
+    return clickbait_clasified / clickbait_collected;
 
 }
