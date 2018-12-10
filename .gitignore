@@ -1,2 +1,3 @@
 *.o
 *.h.gch
+main_program/build/main.exe
