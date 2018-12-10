@@ -15,7 +15,7 @@ int classify( Headline *headline, Feature *features ) {
     printf("feature vector %d, ", headline->feature_vector);
 
     prob_cb = _calculate_cb_prob( *headline, features );
-    printf("cb prob: %lf\n", prob_cb);
+    printf("cb prob: %f\n", prob_cb);
 
     headline->classified_clickbait = ( prob_cb >= PROB_THRESHOLD )? 1: 0;
     return headline->classified_clickbait;

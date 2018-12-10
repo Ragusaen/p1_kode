@@ -27,13 +27,13 @@ int main( int argc, const char* argv[] ) {
     int test_count;
 
     Feature* feature_probabilities;
-    import_csv( &training_data, &training_count, "res/training_data.csv" );
+    import_csv( &training_data, &training_count, "res/training.csv" );
     printf("Imported training data, with %d points\n", training_count);
 
     feature_probabilities = calculate_feature_array( training_data, training_count );
     printf("Calculated feature array\n");
 
-    import_csv( &test_data, &test_count, "res/test_data.csv");
+    import_csv( &test_data, &test_count, "res/test.csv");
     printf("Imported test data, with %d points\n", test_count);
 
     classify_array( test_data, test_count, feature_probabilities );
