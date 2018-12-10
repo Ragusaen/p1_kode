@@ -51,7 +51,7 @@ uint8_t average_length(char str_in[]) {
 
 
 uint8_t special_words(char str_in[]) {
-    int is_word = 0;
+    int has_word = 0;
     int i = 0;
 
     char* words[AMOUNT_OF_SPECIAL_WORDS];
