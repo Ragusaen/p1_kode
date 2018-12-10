@@ -54,26 +54,16 @@ uint8_t special_words(char str_in[]) {
     int has_word = 0;
     int i = 0;
 
-    char* words[AMOUNT_OF_SPECIAL_WORDS];
-    words[0] = "Sådan";
-    words[1] = "sådan";
-    words[3] = "Derfor";
-    words[4] = "derfor";
-    words[5] = "Denne";
-    words[6] = "denne";
-    words[7] = "Dette";
-    words[8] = "Her";
-    words[9] = "her";
-    words[11] = "Så meget";
-    words[12] = "så meget";
-    words[13] = "Så lidt";
-    words[14] = "så lidt";
+    char* words[AMOUNT_OF_SPECIAL_WORDS] = {
+        "sådan", "derfor", "denne", "dette", "her", "så meget", "så lidt"
+    };
 
     for ( i = 0; i < AMOUNT_OF_SPECIAL_WORDS && !has_word; i++ ) {
-        if (strstr(str_in, words[i]) != 0) {
+        if (strstr(strlwr(str_in), words[i]) != NULL) {
             has_word = 1;
         }
     }
+    
     return has_word;
 }
 
