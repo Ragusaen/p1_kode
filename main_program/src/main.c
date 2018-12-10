@@ -1,8 +1,8 @@
-/*
-    Automatic detection of clickbait
-
-
-*/
+/**
+ *  Automatic detection of clickbait
+ *
+ *
+ **/
 
 /* This controls wether or not the program is in debugging mode for conditional compilation */
 #define DEBUG_MODE 1
@@ -65,6 +65,11 @@ void print_feature_array( Feature *features ) {
     int i;
     printf("Features:\n");
     for ( i = 0; i < FEATURE_COUNT; i++ ) {
-        printf("\t%d:p(CB|F): %4f - p(CB|!F):%4f - p(F): %4f\n", i, features[i].prob_cb_given_feature, ( 0.5 - features[i].prob_cb_given_feature * features[i].prob_feature ) / ( 1 - features[i].prob_feature ), features[i].prob_feature );
+        printf("\t%d:p(CB|F): %4f - p(CB|!F):%4f - p(F): %4f\n",
+            i,
+            features[i].prob_cb_given_feature,
+            ( 0.5 - features[i].prob_cb_given_feature * features[i].prob_feature ) / ( 1 - features[i].prob_feature ),
+            features[i].prob_feature
+        );
     }
 }
