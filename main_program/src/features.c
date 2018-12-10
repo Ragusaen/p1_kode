@@ -21,12 +21,7 @@ uint8_t longest_word(char str_in[]) {
         }
         str_length_pre = str_length_post + 1;
     }
-    if(word_length > MAX_WORD_LENGTH){
-        return 0;
-    }
-    else{
-        return 1;
-    }
+    return word_length < MIN_WORD_LENGTH;
 }
 
 uint8_t average_length(char str_in[]) {
@@ -75,7 +70,7 @@ uint8_t special_words(char str_in[]) {
 }
 
 uint8_t total_length(char str_in[]) {
-    return (strlen(str_in) > MAX_TOTAL_LENGTH);
+    return (strlen(str_in) < MIN_TOTAL_LENGTH);
 }
 
 

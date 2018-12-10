@@ -2,9 +2,9 @@
 #define FEATURES_H
 
 #define FEATURE_COUNT 6
-#define MAX_WORD_LENGTH 8
+#define MIN_WORD_LENGTH 8
 #define MAX_AVERAGE_WORD_LENGTH 6
-#define MAX_TOTAL_LENGTH 30
+#define MIN_TOTAL_LENGTH 30
 #define AMOUNT_OF_SPECIAL_WORDS 6
 
 #include <stdint.h>
