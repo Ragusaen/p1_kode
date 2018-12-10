@@ -18,7 +18,7 @@ int import_csv(Headline **headlines, int *headline_count, char *file_path) {
 
     /* Rewind the file pointer */
     rewind(dataset);
-
+    
     /* Import all data from the file and insert it to the struct */
     _read_headlines(dataset, *headlines, *headline_count);
 
