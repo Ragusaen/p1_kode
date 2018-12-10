@@ -5,7 +5,7 @@
 #define MIN_WORD_LENGTH 8
 #define MAX_AVERAGE_WORD_LENGTH 6
 #define MIN_TOTAL_LENGTH 30
-#define AMOUNT_OF_SPECIAL_WORDS 6
+#define AMOUNT_OF_SPECIAL_WORDS 14
 
 #include <stdint.h>
 #include <string.h>
