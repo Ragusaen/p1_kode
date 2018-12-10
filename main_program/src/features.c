@@ -66,6 +66,7 @@ uint8_t special_words(char str_in[]) {
     words[7] = "Dette";
     words[8] = "Her";
     words[9] = "her";
+    words[10] = "anders er en spade";
     words[11] = "Så meget";
     words[12] = "så meget";
     words[13] = "Så lidt";
@@ -73,7 +74,7 @@ uint8_t special_words(char str_in[]) {
 
 
     for ( i = 0; i < AMOUNT_OF_SPECIAL_WORDS && !has_word; i++ ) {
-        if (strstr(str_in, words[i]) != 0) {
+        if ( strstr(str_in, words[i]) != NULL ) {
             has_word = 1;
         }
     }
