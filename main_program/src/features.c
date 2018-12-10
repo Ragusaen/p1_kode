@@ -21,12 +21,7 @@ uint8_t longest_word(char str_in[]) {
         }
         str_length_pre = str_length_post + 1;
     }
-    if(word_length > MAX_WORD_LENGTH){
-        return 0;
-    }
-    else{
-        return 1;
-    }
+    return word_length < MIN_WORD_LENGTH;
 }
 
 uint8_t average_length(char str_in[]) {
@@ -54,17 +49,25 @@ uint8_t average_length(char str_in[]) {
 }
 
 
+
 uint8_t special_words(char str_in[]) {
     int has_word = 0;
-    int i;
+    int i = 0;
 
     char* words[AMOUNT_OF_SPECIAL_WORDS];
-    words[0] = "sådan";
-    words[1] = "YEET";
-    words[2] = "WhoDis";
-    words[3] = "YUUYT";
-    words[4] = "YAATY";
-    words[5] = "EYYYT";
+    words[0] = "Sådan";
+    words[1] = "sådan";
+    words[3] = "Derfor";
+    words[4] = "derfor";
+    words[5] = "Denne";
+    words[6] = "denne";
+    words[7] = "Dette";
+    words[8] = "Her";
+    words[9] = "her";
+    words[11] = "Så meget";
+    words[12] = "så meget";
+    words[13] = "Så lidt";
+    words[14] = "så lidt";
 
     for ( i = 0; i < AMOUNT_OF_SPECIAL_WORDS && !has_word; i++ ) {
         if (strstr(str_in, words[i]) != 0) {
@@ -75,7 +78,7 @@ uint8_t special_words(char str_in[]) {
 }
 
 uint8_t total_length(char str_in[]) {
-    return (strlen(str_in) > MAX_TOTAL_LENGTH);
+    return (strlen(str_in) < MIN_TOTAL_LENGTH);
 }
 
 

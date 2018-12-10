@@ -18,6 +18,7 @@
 #include "recall_precision.h"
 
 void print_classification( Headline *test_data, int test_count );
+void print_feature_array( Feature *features );
 
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {
@@ -33,6 +34,7 @@ int main( int argc, const char* argv[] ) {
 
     feature_probabilities = calculate_feature_array( training_data, training_count );
     printf("Calculated feature array\n");
+    print_feature_array( feature_probabilities );
 
     import_csv( &test_data, &test_count, "res/test.csv");
     printf("Imported test data, with %d points\n", test_count);
@@ -56,5 +58,13 @@ void print_classification( Headline *test_data, int test_count ) {
             l ? "[clickbait]    " : "[non-clickbait]",
             test_data[i].title
         );
+    }
+}
+
+void print_feature_array( Feature *features ) {
+    int i;
+    printf("Features:\n");
+    for ( i = 0; i < FEATURE_COUNT; i++ ) {
+        printf("\t%d:p(CB|F): %4f - p(CB|!F):%4f - p(F): %4f\n", i, features[i].prob_cb_given_feature, ( 0.5 - features[i].prob_cb_given_feature * features[i].prob_feature ) / ( 1 - features[i].prob_feature ), features[i].prob_feature );
     }
 }
