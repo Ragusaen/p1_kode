@@ -27,10 +27,10 @@ double precision(Headline *data_in, int data_amount) {
          if(data_in[i].classified_clickbait == 1  && data_in[i].labeled_clickbait == 1){
                 clickbait_collected++;
         }
-        if (data_in[i].labeled_clickbait == 1) {
+        if (data_in[i].classified_clickbait == 1) {
                 clickbait_clasified++;
         }
     }
-    return clickbait_clasified / clickbait_collected;
+    return clickbait_colected / clickbait_clasified;
 
 }
