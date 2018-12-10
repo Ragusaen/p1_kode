@@ -1,8 +1,4 @@
 #include "features.h"
-<<<<<<< HEAD
-=======
-
->>>>>>> 94163baee58c759447fdd046b34b4facd32e1424
 
 uint8_t longest_word(char str_in[]) {
 
@@ -64,32 +60,31 @@ uint8_t average_length(char str_in[]) {
 
 
 
-<<<<<<< HEAD
-int special_words(char str_in[]) {
+uint8_t special_words(char str_in[]) {
     int is_word = 0;
     int i = 0;
 
     char* words[AMOUNT_OF_SPECIAL_WORDS];
-=======
-uint8_t special_words(char str_in[]) {
-    int words_amount = 5;
-    const char* words[words_amount];
->>>>>>> 94163baee58c759447fdd046b34b4facd32e1424
-    words[0] = "IN";
-    words[1] = "YEET";
-    words[3] = "YUUYT";
-    words[4] = "YAATY";
-    words[5] = "EYYYT";
+    words[0] = "Sådan";
+    words[1] = "sådan";
+    words[3] = "Derfor";
+    words[4] = "derfor";
+    words[5] = "Denne";
+    words[6] = "denne";
+    words[7] = "Dette";
+    words[8] = "Her";
+    words[9] = "her";
+    words[11] = "Så meget";
+    words[12] = "så meget";
+    words[13] = "Så lidt";
+    words[14] = "så lidt";
+    
+    //please work
 
     for (i; i <= AMOUNT_OF_SPECIAL_WORDS; i++) {
         if (strstr(str_in, words[i]) != 0) {
-<<<<<<< HEAD
         is_word++;
         break;
-=======
-            word_score++;
-            break;
->>>>>>> 94163baee58c759447fdd046b34b4facd32e1424
         }
     }
     return is_word;
