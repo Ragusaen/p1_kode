@@ -30,6 +30,7 @@ uint8_t has_cb_punctuation(char str_in[]);
 uint8_t has_cb_hastag(char str_in[]);
 uint8_t begins_with_number(char str_in[]);
 
-char *str_lwr( char *str );
+char * _string_lower( char *str );
+uint8_t _match_whole_word( char *str, char *word );
 
 #endif
