@@ -41,7 +41,7 @@ FILE *_open_file( char *file_path_str ) {
 /* Count the number of headlines and return it to main */
 int _count_headlines(FILE *dataset) {
     int lines = 0;
-
+    /* Counts each line for every new line, as to avoid terminating at commas etc. */
     while ( !feof(dataset) ) {
         if ( fgetc(dataset) == '\n' )
             lines++;
@@ -52,19 +52,21 @@ int _count_headlines(FILE *dataset) {
 /* Read the file and insert it to the struct */
 void _read_headlines(FILE *dataset, Headline *headlines, int headline_count ) {
     int i;
-
+    /* Gets one full line from the file at a time, until all headlines have been copied to the struct */
     for ( i = 0; i < headline_count; i++ ) {
         char buffer[FILE_BUFFER_LENGTH];
+        /* Makes sure the line isn't empty */
         if ( fgets(buffer, FILE_BUFFER_LENGTH, dataset ) ) {
             int j, cb_label = 0;
             for (j=1; !(buffer[j-1] == '\"' && buffer[j] == ',') && j<FILE_BUFFER_LENGTH;j++);
             buffer[j-1] = '\0';
-
+            /* Allocate memory for the each title */
             headlines[i].title = (char*)malloc(j-1);
             if ( headlines[i].title == NULL ) {
                 printf("Couldn't allocate memory for headline %d\n", i );
                 exit(EXIT_FAILURE);
             }
+            /* Copies headline i into the struct */
             strcpy( headlines[i].title, (buffer+1) );
 
             sscanf(buffer + j + 1, " %d", &cb_label );
