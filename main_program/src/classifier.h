@@ -1,7 +1,7 @@
 #ifndef CLASSIFIER_H
 #define CLASSIFIER_H
 
-#define PROB_THRESHOLD 0.015
+#define PROB_THRESHOLD 0.003
 
 #include <stdint.h>
 

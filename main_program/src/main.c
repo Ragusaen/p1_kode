@@ -43,7 +43,7 @@ int main( int argc, const char* argv[] ) {
     classify_array( test_data, test_count, feature_probabilities, PROBABILITY_THRESHOLD );
     printf("Classified array\n");
 
-    print_classification( test_data, test_count );
+    /*print_classification( test_data, test_count );*/
     printf("\nProgram finished, exiting...\n");
 
     printf("\nPrecision = %f\t Recall = %f\n", precision(test_data, test_count), recall(test_data, test_count) );
