@@ -3,7 +3,6 @@
 void classify_array( Headline *headlines, uint16_t headline_count, Feature *features ) {
     uint16_t i;
     for ( i = 0; i < headline_count; i++ ) {
-        printf("%d:\t", i);
         classify( headlines + i, features );
     }
 }
@@ -12,10 +11,9 @@ int classify( Headline *headline, Feature *features ) {
     double prob_cb;
 
     _set_feature_vector( headline, features );
-    printf("feature vector %d\t", headline->feature_vector);
 
     prob_cb = _calculate_cb_prob( *headline, features );
-    printf("cb prob: %f\n", prob_cb);
+    /*printf("%f\n", prob_cb );*/
 
     headline->classified_clickbait = ( prob_cb >= PROB_THRESHOLD )? 1: 0;
     return headline->classified_clickbait;
@@ -28,12 +26,14 @@ Feature *calculate_feature_array( Headline* headlines, uint16_t headline_count )
     if ( features == NULL )
         exit(EXIT_FAILURE);
 
-    features[0].has_feature = &longest_word;
-    features[1].has_feature = &special_words;
-    features[2].has_feature = &total_length;
-    features[3].has_feature = &has_cb_punctuation;
-    features[4].has_feature = &has_cb_hastag;
-    features[5].has_feature = &begins_with_number;
+    features[0].has_feature = &has_long_word;
+    features[1].has_feature = &has_special_words;
+    features[2].has_feature = &is_long;
+    features[3].has_feature = &has_punctuation;
+    features[4].has_feature = &has_pronouns;
+    features[5].has_feature = &has_number;
+    features[6].has_feature = &has_long_average_words;
+    features[7].has_feature = &has_stop_words;
 
     for ( i = 0; i < headline_count; i++ ) {
         _add_feature_count( headlines[i], features );
