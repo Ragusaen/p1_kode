@@ -6,6 +6,7 @@
 
 /* This controls wether or not the program is in debugging mode for conditional compilation */
 #define DEBUG_MODE 1
+#define PROBABILITY_THRESHOLD 0.01
 
 /* Include libraries */
 #include <stdlib.h>
@@ -15,7 +16,7 @@
 #include "classifier.h"
 #include "headline.h"
 #include "features.h"
-#include "recall_precision.h"
+#include "evaluation.h"
 
 void print_classification( Headline *test_data, int test_count );
 void print_feature_array( Feature *features );
@@ -39,7 +40,7 @@ int main( int argc, const char* argv[] ) {
     import_csv( &test_data, &test_count, "res/test.csv");
     printf("Imported test data, with %d points\n", test_count);
 
-    classify_array( test_data, test_count, feature_probabilities );
+    classify_array( test_data, test_count, feature_probabilities, PROBABILITY_THRESHOLD );
     printf("Classified array\n");
 
     print_classification( test_data, test_count );

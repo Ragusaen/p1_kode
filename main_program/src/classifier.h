@@ -8,8 +8,8 @@
 #include "headline.h"
 #include "features.h"
 
-int classify( Headline *headline, Feature *features );
-void classify_array( Headline *headlines, uint16_t headline_count, Feature *features );
+int classify( Headline *headline, Feature *features, double threshold );
+void classify_array( Headline *headlines, uint16_t headline_count, Feature *features, double threshold );
 Feature* calculate_feature_array( Headline* headlines, uint16_t headline_count );
 
 void _set_feature_vector( Headline *headline, Feature *features );

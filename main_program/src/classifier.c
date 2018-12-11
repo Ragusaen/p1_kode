@@ -1,14 +1,14 @@
 #include "classifier.h"
 
-void classify_array( Headline *headlines, uint16_t headline_count, Feature *features ) {
+void classify_array( Headline *headlines, uint16_t headline_count, Feature *features, double threshold ) {
     uint16_t i;
     for ( i = 0; i < headline_count; i++ ) {
         printf("%d:\t", i);
-        classify( headlines + i, features );
+        classify( headlines + i, features, threshold );
     }
 }
 
-int classify( Headline *headline, Feature *features ) {
+int classify( Headline *headline, Feature *features, double threshold ) {
     double prob_cb;
 
     _set_feature_vector( headline, features );
@@ -17,7 +17,7 @@ int classify( Headline *headline, Feature *features ) {
     prob_cb = _calculate_cb_prob( *headline, features );
     printf("cb prob: %f\n", prob_cb);
 
-    headline->classified_clickbait = ( prob_cb >= PROB_THRESHOLD )? 1: 0;
+    headline->classified_clickbait = ( prob_cb >= threshold )? 1: 0;
     return headline->classified_clickbait;
 }
 

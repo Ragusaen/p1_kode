@@ -1,5 +1,4 @@
-#include "recall_precision.h"
-#include "headline.h"
+#include "evaluation.h"
 
 double recall(Headline *data_in, int data_amount) {
 
@@ -32,4 +31,15 @@ double precision(Headline *data_in, int data_amount) {
     }
     return (double)clickbait_tp / clickbait_cp;
 
+}
+
+ROC_point *calculate_ROC(Headline *headlines, int count) {
+
+    ROC_point *data_points = (ROC_point*)malloc( ROC_POINTS * sizeof(ROC_point) );
+    if ( data_points == NULL ) {
+        printf("Error allocating memory: data_points");
+        exit(EXIT_FAILURE);
+    }
+
+    return data_points;
 }
