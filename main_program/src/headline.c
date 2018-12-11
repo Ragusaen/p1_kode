@@ -41,7 +41,7 @@ FILE *_open_file( char *file_path_str ) {
 /* Count the number of headlines and return it to main */
 int _count_headlines(FILE *dataset) {
     int lines = 0;
-    /* Counts each line for every new line, as to avoid terminating at commas etc. */
+    /* Counts each line for every new line and until EOF, as to avoid terminating at commas etc. */
     while ( !feof(dataset) ) {
         if ( fgetc(dataset) == '\n' )
             lines++;
