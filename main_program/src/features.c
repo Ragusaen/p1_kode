@@ -1,33 +1,28 @@
 #include "features.h"
 
-uint8_t has_long_word(char str_in[]) {
+/**
+ * Checks if headline doesn't contain a word longer than 8 characters.
+ */
 
-    int word_length = 0;
-    int i = 0;
-    char* str_length_pre = str_in,
-        *str_length_post = str_in;
-    char word_endings[] = " ,;!.:";
+uint8_t has_no_long_word(char str_in[]) {
+    int longest_word_length = 0,
+        curr_word_length = 0,
+        i;
 
-//This loop finds the longest word.
-    while (i == 0) {
-/*defines str_length_post to a pointer to the firs word ending adter str_length_pre. */
-        str_length_post = strpbrk(str_length_pre, word_endings);
+    for (i = 0; i < strlen(str_in); i++) {
+        /* if current char is punctuation or white-space */
+        if (ispunct(str_in[i]) || isspace(str_in[i])) {
+            /* set longest_word_length if current word length is larger */
+            if (curr_word_length > longest_word_length)
+                longest_word_length = curr_word_length;
 
-/*If no word ending is found, is set str_length_post the length of entire string and
-the loop ends. */
-        if (str_length_post == 0) {
-          str_length_post = str_in + strlen(str_in);
-          i = 1;
+            curr_word_length = 0;
         }
-/*If word_legth is smaller than the difference between the last word ending and the new one. */
-        if (word_length < strlen(str_length_pre) - strlen(str_length_post)) {
-            word_length = strlen(str_length_pre) - strlen(str_length_post);
-        }
-/*The last word ending is set to the new one */
-        str_length_pre = str_length_post + 1;
+        else
+            curr_word_length++;
     }
-/*longest word length is cheched against MIN_WORD_LENGTH. if it is bigger the function returns true. */
-    return word_length < MIN_WORD_LENGTH;
+
+    return longest_word_length < MIN_WORD_LENGTH;
 }
 
 uint8_t has_long_average_words(char str_in[]) {

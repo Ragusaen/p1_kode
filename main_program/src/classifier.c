@@ -26,7 +26,7 @@ Feature *calculate_feature_array( Headline* headlines, uint16_t headline_count )
     if ( features == NULL )
         exit(EXIT_FAILURE);
 
-    features[0].has_feature = &has_long_word;
+    features[0].has_feature = &has_no_long_word;
     features[1].has_feature = &has_special_words;
     features[2].has_feature = &is_long;
     features[3].has_feature = &has_punctuation;

@@ -25,7 +25,7 @@ typedef struct Feature {
     uint8_t  (*has_feature)(char*);
 } Feature;
 
-uint8_t has_long_word(char str_in[]);
+uint8_t has_no_long_word(char str_in[]);
 uint8_t has_special_words(char str_in[]);
 uint8_t is_long(char str_in[]);
 uint8_t has_punctuation(char str_in[]);
