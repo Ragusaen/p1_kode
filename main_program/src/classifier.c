@@ -28,8 +28,8 @@ Feature *calculate_feature_array( Headline* headlines, uint16_t headline_count )
 
     features[0].has_feature = &has_no_long_word;
     features[1].has_feature = &has_special_words;
-    features[2].has_feature = &is_long;
-    features[3].has_feature = &has_punctuation;
+    features[2].has_feature = &is_short;
+    features[3].has_feature = &has_special_punctuation;
     features[4].has_feature = &has_pronouns;
     features[5].has_feature = &has_number;
     features[6].has_feature = &has_low_average_word_length;

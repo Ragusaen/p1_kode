@@ -54,42 +54,60 @@ uint8_t has_low_average_word_length(char str_in[]) {
 }
 
 
+/**
+ * Checks if headline contains special forward-referencing words.
+ */
 
 uint8_t has_special_words(char str_in[]) {
     char* words[AMOUNT_OF_SPECIAL_WORDS] = {
         "sådan", "derfor", "denne", "dette", "her", "så meget", "så lidt"
     };
-    return _str_count_words( str_in, words, AMOUNT_OF_SPECIAL_WORDS );
-}
-
-uint8_t is_long(char str_in[]) {
-/*Sammenligner overskriftens længde med MIN_TOTAL_LENGTH*/
-    return (strlen(str_in) < MIN_TOTAL_LENGTH);
+    return _str_count_words( str_in, words, AMOUNT_OF_SPECIAL_WORDS ) > 0;
 }
 
 
-uint8_t has_punctuation(char str_in[]) {
-    char* chars = ":!?";
-    return _str_has_chars( str_in, chars );
+/**
+ * Checks if headline is less than 40 characters long.
+ */
+
+uint8_t is_short(char str_in[]) {
+    return strlen(str_in) < MIN_TOTAL_LENGTH;
 }
+
+
+/**
+ * Checks if headline contains special punctuation, : ! ?
+ */
+
+uint8_t has_special_punctuation(char str_in[]) {
+    return strpbrk(str_in, ":!?") != NULL;
+}
+
+
+/**
+ * Checks if headline contains pronouns.
+ */
 
 uint8_t has_pronouns(char str_in[]) {
     char *words[AMOUNT_OF_PRONOUNS] = {
         "du", "han", "hun", "hende", "din", "jeg", "os", "de", "min", "dit"
     };
-    return _str_count_words( str_in, words, AMOUNT_OF_PRONOUNS );
+    return _str_count_words( str_in, words, AMOUNT_OF_PRONOUNS ) > 0;
 }
 
-uint8_t has_number(char str_in[]){
-    int cb_number = 0, i;
 
-    for(i = 0; i <= strlen(str_in) && cb_number == 0; i++){
-        if(isdigit(str_in[i]) ) {
-            cb_number = 1;
-        }
-    }
-	return cb_number;
+/**
+ * Checks if headline contains a number.
+ */
+
+uint8_t has_number(char str_in[]) {
+	return strpbrk(str_in, "0123456789") != NULL;
 }
+
+
+/**
+ * Checks if headline contains more than 2 stop-words.
+ */
 
 uint8_t has_stop_words(char str_in[]) {
     char *words[AMOUNT_OF_STOP_WORDS] = {
@@ -97,6 +115,11 @@ uint8_t has_stop_words(char str_in[]) {
     };
     return _str_count_words( str_in, words, AMOUNT_OF_STOP_WORDS ) > MAX_STOP_WORDS;
 }
+
+
+/**
+ * Transforms str to lowercase.
+ */
 
 char * _string_lower( char *str ) {
     int i;
@@ -109,34 +132,35 @@ char * _string_lower( char *str ) {
     return lwr;
 }
 
+
+/**
+ * Matches a whole word in str.
+ */
+
 uint8_t _match_whole_word( char *str, char *word ) {
     char *ret = strstr(str, word);
     int before, after;
 
-    if (ret != NULL) {
+    while (ret != NULL) {
         before = (int) (ret - str) - 1;
         after = before + strlen(word) + 1;
 
-        return (
-            (before == -1 || ispunct(str[before]) || isspace(str[before])) &&
-            (after == strlen(str) || ispunct(str[after]) || isspace(str[after]))
-        );
+        /* check if match is a whole word and return true */
+        if ( (before == -1 || ispunct(str[before]) || isspace(str[before])) &&
+             (after == strlen(str) || ispunct(str[after]) || isspace(str[after])) )
+            return 1;
+        
+        /* find next match */
+        ret = after != strlen(str) ? strstr(str+after, word) : NULL;
     }
 
     return 0;
 }
 
-uint8_t _str_has_chars( char *str, char *chars ) {
-    int i;
-    for ( i = 0; i < strlen(str); i++ ) {
-        int j;
-        for ( j = 0; j < strlen(chars); j++ ) {
-            if ( str[i] == chars[j] )
-                return 1;
-        }
-    }
-    return 0;
-}
+
+/**
+ * Counts matched whole words in str.
+ */
 
 uint8_t _str_count_words( char *str, char **words, int word_count ) {
     int i, matches = 0;
