@@ -36,6 +36,6 @@ uint8_t has_stop_words(char str_in[]);
 
 char * _string_lower( char *str );
 uint8_t _match_whole_word( char *str, char *word );
-uint8_t _str_count_words( char *str, char **words, int word_count );
+int _str_count_words( char *str, char **words, int word_count );
 
 #endif

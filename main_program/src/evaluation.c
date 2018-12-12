@@ -1,42 +1,41 @@
 #include "evaluation.h"
 
 double recall(Headline *data_in, int data_amount) {
+    int i,
+        clickbait_tp = 0,
+        clickbait_lp = 0;
 
-    int i;
-    int clickbait_tp = 0;
-    int clickbait_lp = 0;
-
-/*Goes Through all the data.  */
     for (i = 0; i < data_amount; i++){
-/*assign all the clickbait to clickbait_lp. */
+        /* count all headlines labeled as clickbait */
         if ( data_in[i].labeled_clickbait ) {
             clickbait_lp++;
 
-/*assign all the true positives in clickbait_lp to to clickbait_tp. */
+            /* count all the true positives */
             if ( data_in[i].classified_clickbait )
                 clickbait_tp++;
         }
     }
-    return (double)clickbait_tp / clickbait_lp;
+
+    return (double) clickbait_tp / clickbait_lp;
 }
 
 double precision(Headline *data_in, int data_amount) {
-    int i;
-    int clickbait_cp = 0, clickbait_tp = 0;
+    int i,
+        clickbait_cp = 0,
+        clickbait_tp = 0;
 
-/*Goes Through all the data.  */
     for (i = 0; i < data_amount; i++) {
-/*assign all the positives to clickbait_cp. */
-         if ( data_in[i].classified_clickbait ) {
+        /* count all the positives */
+        if ( data_in[i].classified_clickbait ) {
             clickbait_cp++;
 
-/*assign all the true positives in clickbait_cp to to clickbait_tp. */
+            /* count all the true positives */
             if ( data_in[i].labeled_clickbait )
                 clickbait_tp++;
         }
     }
-    return (double)clickbait_tp / clickbait_cp;
 
+    return (double) clickbait_tp / clickbait_cp;
 }
 
 double f_measure(Headline *data_in, int data_amount){

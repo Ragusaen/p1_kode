@@ -162,7 +162,7 @@ uint8_t _match_whole_word( char *str, char *word ) {
  * Counts matched whole words in str.
  */
 
-uint8_t _str_count_words( char *str, char **words, int word_count ) {
+int _str_count_words( char *str, char **words, int word_count ) {
     int i, matches = 0;
     char *lower_string = _string_lower(str);
 

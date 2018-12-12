@@ -44,9 +44,13 @@ int main( int argc, const char* argv[] ) {
     printf("Classified array\n");
 
     /*print_classification( test_data, test_count );*/
-    printf("\nProgram finished, exiting...\n");
 
-    printf("\nPrecision = %f\t Recall = %f\n", precision(test_data, test_count), recall(test_data, test_count) );
+    printf("\nPrecision = %f\t Recall = %f\n",
+        precision(test_data, test_count),
+        recall(test_data, test_count)
+    );
+
+    printf("\nProgram finished, exiting...\n");
 
     return EXIT_SUCCESS;
 }
@@ -66,13 +70,27 @@ void print_classification( Headline *test_data, int test_count ) {
 
 void print_feature_array( Feature *features ) {
     int i;
-    printf("Features:\n");
+    char* feature_names[8] = {
+        "has_no_long_word",
+        "has_special_words",
+        "is_short",
+        "has_special_punctuation",
+        "has_pronouns",
+        "has_number",
+        "has_low_average_word_length",
+        "has_stop_words"
+    };
+
+    printf("\n%-30s %10s %10s %10s\n", "Feature", "p(CB|F)", "p(CB|!F)", "p(F)");
+
     for ( i = 0; i < FEATURE_COUNT; i++ ) {
-        printf("\t%d:p(CB|F): %4f - p(CB|!F):%4f - p(F): %4f\n",
-            i,
+        printf("%-30s %10.4f %10.4f %10.4f\n",
+            feature_names[i],
             features[i].prob_cb_given_feature,
             ( 0.5 - features[i].prob_cb_given_feature * features[i].prob_feature ) / ( 1 - features[i].prob_feature ),
             features[i].prob_feature
         );
     }
+
+    printf("\n");
 }
