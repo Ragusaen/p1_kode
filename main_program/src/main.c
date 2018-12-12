@@ -50,6 +50,8 @@ int main( int argc, const char* argv[] ) {
         recall(test_data, test_count)
     );
 
+    print_confusion_matrix(test_data, test_count);
+
     printf("\nProgram finished, exiting...\n");
 
     return EXIT_SUCCESS;

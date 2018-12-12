@@ -14,9 +14,16 @@ typedef struct ROC_point {
     double threshold;
 } ROC_point;
 
+typedef struct ResultCounter {
+    double P, N, TP, FP, TN, FN, TPR, TNR, PPV, NPV, FNR, FPR, FDR, FOR, ACC, F1, MCC, BM, MK;
+} ResultCounter;
+
 double recall(Headline *data_in, int data_amount);
 double precision(Headline *data_in, int data_amount);
 
 ROC_point *calculate_ROC(Headline *headlines, int count);
+
+void print_confusion_matrix(Headline *data_in, int data_amount);
+ResultCounter _count_results(Headline *data_in, int data_amount);
 
 #endif
