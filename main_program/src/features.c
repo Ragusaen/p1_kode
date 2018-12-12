@@ -1,7 +1,7 @@
 #include "features.h"
 
 /**
- * Checks if headline doesn't contain a word longer than 8 characters.
+ * Checks if headline only contains words less than 8 characters.
  */
 
 uint8_t has_no_long_word(char str_in[]) {
