@@ -6,10 +6,13 @@ double recall(Headline *data_in, int data_amount) {
     int clickbait_tp = 0;
     int clickbait_lp = 0;
 
+/*Goes Through all the data.  */
     for (i = 0; i < data_amount; i++){
+/*assign all the clickbait to clickbait_lp. */
         if ( data_in[i].labeled_clickbait ) {
             clickbait_lp++;
 
+/*assign all the true positives in clickbait_lp to to clickbait_tp. */
             if ( data_in[i].classified_clickbait )
                 clickbait_tp++;
         }
@@ -21,10 +24,13 @@ double precision(Headline *data_in, int data_amount) {
     int i;
     int clickbait_cp = 0, clickbait_tp = 0;
 
+/*Goes Through all the data.  */
     for (i = 0; i < data_amount; i++) {
+/*assign all the positives to clickbait_cp. */
          if ( data_in[i].classified_clickbait ) {
             clickbait_cp++;
 
+/*assign all the true positives in clickbait_cp to to clickbait_tp. */
             if ( data_in[i].labeled_clickbait )
                 clickbait_tp++;
         }
