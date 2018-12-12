@@ -1,7 +1,7 @@
 #include "features.h"
 
 /**
- * Checks if headline only contains words less than 8 characters.
+ * Checks if headline only contains words less than 8 characters long.
  */
 
 uint8_t has_no_long_word(char str_in[]) {
@@ -9,10 +9,10 @@ uint8_t has_no_long_word(char str_in[]) {
         curr_word_length = 0,
         i;
 
-    for (i = 0; i < strlen(str_in); i++) {
-        /* if current char is punctuation or white-space */
-        if (ispunct(str_in[i]) || isspace(str_in[i])) {
-            /* set longest_word_length if current word length is larger */
+    for (i = 0; i <= strlen(str_in); i++) {
+        /* if end-of-str or current char is punctuation or white-space */
+        if (i == strlen(str_in) || ispunct(str_in[i]) || isspace(str_in[i])) {
+            /* set longest_word_length if current word-length is larger */
             if (curr_word_length > longest_word_length)
                 longest_word_length = curr_word_length;
 
@@ -25,27 +25,32 @@ uint8_t has_no_long_word(char str_in[]) {
     return longest_word_length < MIN_WORD_LENGTH;
 }
 
-uint8_t has_long_average_words(char str_in[]) {
-    int i = 0, sum = 0, words = 0;
-    char* str_length_pre = str_in,
-    *str_length_post = str_in;
-    char word_endings[] = " ,;!.:";
 
-/*Caluculates the individual word lengths like has_long word, but adds the toghether. */
-    while (i == 0) {
-        str_length_post = strpbrk(str_length_pre, word_endings);
+/**
+ * Checks if the headline's average word length is below 4.5.
+ */
 
-        if (str_length_post == 0) {
-            str_length_post = str_in + strlen(str_in);
-            i = 1;
+uint8_t has_low_average_word_length(char str_in[]) {
+    int i = 0,
+        word_length_sum = 0,
+        word_count = 0,
+        word_length = 0;
+
+    for (i = 0; i <= strlen(str_in); i++) {
+        /* if end-of-str or current char is punctuation or white-space */
+        if (i == strlen(str_in) || ispunct(str_in[i]) || isspace(str_in[i])) {
+            /* add word_length to sum, increase word_count, and reset word_length */
+            if (word_length > 0) {
+                word_length_sum += word_length;
+                word_count++;
+                word_length = 0;
+            }
         }
-
-        sum += strlen(str_length_pre) - strlen(str_length_post);
-        words++;
-        str_length_pre = str_length_post + 1;
+        else
+            word_length++;
     }
-/*devides the sum with the amount of word, and chechs them against MIN_AVAERAGE_WORD_LENGTH */
-    return ((double)sum / words < MIN_AVERAGE_WORD_LENGTH);
+
+    return ((double) word_length_sum / (double) word_count) < MIN_AVERAGE_WORD_LENGTH;
 }
 
 

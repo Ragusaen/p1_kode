@@ -26,12 +26,12 @@ typedef struct Feature {
 } Feature;
 
 uint8_t has_no_long_word(char str_in[]);
+uint8_t has_low_average_word_length(char str_in[]);
 uint8_t has_special_words(char str_in[]);
 uint8_t is_long(char str_in[]);
 uint8_t has_punctuation(char str_in[]);
 uint8_t has_pronouns(char str_in[]);
 uint8_t has_number(char str_in[]);
-uint8_t has_long_average_words(char str_in[]);
 uint8_t has_stop_words(char str_in[]);
 
 char * _string_lower( char *str );
