@@ -33,6 +33,15 @@ double precision(Headline *data_in, int data_amount) {
 
 }
 
+double f_measure(Headline *data_in, int data_amount){
+   
+    double beta = 1;
+    double precision_ = precision(data_in, data_amount);
+    double recall_ = recall(data_in, data_amount);
+
+    return (1 + beta * beta) * precision_ * recall_ / ((beta * precision_) * recall_);
+}
+
 ROC_point *calculate_ROC(Headline *headlines, int count) {
 
     ROC_point *data_points = (ROC_point*)malloc( ROC_POINTS * sizeof(ROC_point) );

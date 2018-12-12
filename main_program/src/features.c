@@ -8,19 +8,25 @@ uint8_t has_long_word(char str_in[]) {
         *str_length_post = str_in;
     char word_endings[] = " ,;!.:";
 
+//This loop finds the longest word.
     while (i == 0) {
+/*defines str_length_post to a pointer to the firs word ending adter str_length_pre. */
         str_length_post = strpbrk(str_length_pre, word_endings);
 
+/*If no word ending is found, is set str_length_post the length of entire string and
+the loop ends. */
         if (str_length_post == 0) {
           str_length_post = str_in + strlen(str_in);
           i = 1;
         }
-
+/*If word_legth is smaller than the difference between the last word ending and the new one. */
         if (word_length < strlen(str_length_pre) - strlen(str_length_post)) {
             word_length = strlen(str_length_pre) - strlen(str_length_post);
         }
+/*The last word ending is set to the new one */
         str_length_pre = str_length_post + 1;
     }
+/*longest word length is cheched against MIN_WORD_LENGTH. if it is bigger the function returns true. */
     return word_length < MIN_WORD_LENGTH;
 }
 
@@ -30,6 +36,7 @@ uint8_t has_long_average_words(char str_in[]) {
     *str_length_post = str_in;
     char word_endings[] = " ,;!.:";
 
+/*Caluculates the individual word lengths like has_long word, but adds the toghether. */
     while (i == 0) {
         str_length_post = strpbrk(str_length_pre, word_endings);
 
@@ -42,6 +49,7 @@ uint8_t has_long_average_words(char str_in[]) {
         words++;
         str_length_pre = str_length_post + 1;
     }
+/*devides the sum with the amount of word, and chechs them against MIN_AVAERAGE_WORD_LENGTH */
     return ((double)sum / words < MIN_AVERAGE_WORD_LENGTH);
 }
 
@@ -55,6 +63,7 @@ uint8_t has_special_words(char str_in[]) {
 }
 
 uint8_t is_long(char str_in[]) {
+/*Sammenligner overskriftens længde med MIN_TOTAL_LENGTH*/
     return (strlen(str_in) < MIN_TOTAL_LENGTH);
 }
 
