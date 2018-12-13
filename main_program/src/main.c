@@ -6,7 +6,8 @@
 
 /* This controls wether or not the program is in debugging mode for conditional compilation */
 #define DEBUG_MODE 1
-#define PROBABILITY_THRESHOLD 0.01
+
+#define PROBABILITY_THRESHOLD 0.003448
 
 /* Include libraries */
 #include <stdlib.h>
@@ -20,6 +21,8 @@
 
 void print_classification( Headline *test_data, int test_count );
 void print_feature_array( Feature *features );
+void print_headline_features(uint8_t feature_vector);
+void print_confusion_matrix(ConfusionMatrix cm);
 
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {
@@ -27,30 +30,30 @@ int main( int argc, const char* argv[] ) {
     int training_count;
     Headline *test_data;
     int test_count;
-
+    double threshold;
     Feature* feature_probabilities;
+    ConfusionMatrix confusion_matrix;
 
     import_csv( &training_data, &training_count, "res/training.csv" );
     printf("Imported training data, with %d points\n", training_count);
 
     feature_probabilities = calculate_feature_array( training_data, training_count );
-    printf("Calculated feature array\n");
+    printf("\nCalculated feature array\n");
     print_feature_array( feature_probabilities );
 
-    import_csv( &test_data, &test_count, "res/test.csv");
-    printf("Imported test data, with %d points\n", test_count);
+    threshold = calculate_threshold(training_data, training_count, feature_probabilities);
+    printf("\nThreshold = %f\n", threshold);
 
-    classify_array( test_data, test_count, feature_probabilities, PROBABILITY_THRESHOLD );
-    printf("Classified array\n");
+    import_csv( &test_data, &test_count, "res/test.csv");
+    printf("\nImported test data, with %d points.\n", test_count);
+
+    classify_array( test_data, test_count, feature_probabilities, threshold );
+    printf("Test data successfully classified.\n");
 
     /*print_classification( test_data, test_count );*/
 
-    printf("\nPrecision = %f\t Recall = %f\n",
-        precision(test_data, test_count),
-        recall(test_data, test_count)
-    );
-
-    print_confusion_matrix(test_data, test_count);
+    confusion_matrix = calc_confusion_matrix(test_data, test_count);
+    print_confusion_matrix(confusion_matrix);
 
     printf("\nProgram finished, exiting...\n");
 
@@ -95,4 +98,41 @@ void print_feature_array( Feature *features ) {
     }
 
     printf("\n");
+}
+
+void print_headline_features(uint8_t feature_vector) {
+    int i;
+
+    for (i = FEATURE_COUNT - 1; i >= 0; i--) {
+        printf("%u", feature_vector % 2 == 1 ? 1 : 0);
+        feature_vector >>= 1;
+    }
+}
+
+void print_confusion_matrix(ConfusionMatrix cm) {
+    printf(
+        "\nCONFUSION MATRIX\n"
+        "=============================================================================\n"
+    );
+    printf(
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %-6.4f  %3s: %-6.4f\n"
+        "-----------------------------------------------------------------------------\n"
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %-6.4f  %3s: %-6.4f\n"
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %-6.4f  %3s: %-6.4f\n",
+        "Total", cm.total, "CP", cm.P, "CN", cm.N, "Prior", cm.prior, "ACC", cm.ACC,
+        "PCP", cm.PP, "TP", cm.TP, "FP", cm.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
+        "PCN", cm.PN, "FN", cm.FN, "TN", cm.TN, "FOR", cm.FOR, "NPV", cm.NPV
+    );
+    printf(
+        "-----------------------------------------------------------------------------\n"
+        "%13s  |  %5s: %-6.4f  %5s: %-6.4f  |  %5s: %-6.4f\n"
+        "%13s  |  %5s: %-6.4f  %5s: %-6.4f  |  %5s: %-6.4f  %3s: %-6.4f\n"
+        "%13s  |  %28s  |  %5s: %-6.4f  %3s: %-6.4f\n",
+        "", "**TPR", cm.TPR, "FPR", cm.FPR, "LR+", cm.LRP,
+        "", "FNR", cm.FNR, "TNR", cm.TNR, "LR-", cm.LRN, "F1", cm.F1,
+        "", "", "DOR", cm.DOR, "MCC", cm.MCC
+    );
+    printf(
+        "=============================================================================\n"
+    );
 }

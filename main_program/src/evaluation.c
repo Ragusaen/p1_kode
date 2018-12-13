@@ -58,88 +58,76 @@ ROC_point *calculate_ROC(Headline *headlines, int count) {
     return data_points;
 }
 
-void print_confusion_matrix(Headline *data_in, int data_amount) {
-    ResultCounter rc = _count_results(data_in, data_amount);
-
-    printf("\n"
-        "Total %-6.0f   CP %-6.0f   CN %-6.0f  Prevalence %-6.4f  ACC %-6.4f\n"
-        "  PCP %-6.0f   TP %-6.0f   FP %-6.0f   Precision %-6.4f  FDR %-6.4f\n"
-        "  PCN %-6.0f   FN %-6.0f   TN %-6.0f         FOR %-6.4f  NPV %-6.4f\n"
-        "              TPR %-6.4f  FPR %-6.4f         LR+ %-6.4f  DOR %-6.4f\n"
-        "              FNR %-6.4f  TNR %-6.4f         LR- %-6.4f   F1 %-6.4f\n"
-        "                                                         MCC %-6.4f\n",
-        rc.P + rc.N, rc.P, rc.N, rc.P / (rc.P + rc.N), rc.ACC,
-        rc.TP + rc.FP, rc.TP, rc.FP, rc.PPV, rc.FDR,
-        rc.FN + rc.TN, rc.FN, rc.TN, rc.FOR, rc.NPV,
-        rc.TPR, rc.FPR, rc.TPR / rc.FPR, (rc.TPR / rc.FPR) / (rc.FNR / rc.TNR),
-        rc.FNR, rc.TNR, rc.FNR / rc.TNR, rc.F1,
-        rc.MCC
-    );
-}
-
-ResultCounter _count_results(Headline *data_in, int data_amount) {
+ConfusionMatrix calc_confusion_matrix(Headline *data_in, int data_amount) {
     int i;
-    double denom;
-    ResultCounter rc;
+    uint8_t c, l;
+    double mcc_denom;
+    ConfusionMatrix cm;
+
+    /* reset counters */
+    cm.P = 0; cm.N = 0; cm.TP = 0; cm.FP = 0; cm.FN = 0; cm.TN = 0;
 
     for (i = 0; i < data_amount; i++) {
-        if ( data_in[i].labeled_clickbait ) {
-            rc.P++;
+        l = data_in[i].labeled_clickbait;
+        c = data_in[i].classified_clickbait;
 
-            if ( data_in[i].classified_clickbait )
-                rc.TP++;
-            else
-                rc.FN++;
+        if ( l == 1 ) {
+            cm.P++;
+            if ( c == 1 ) cm.TP++; else cm.FN++;
         }
         else {
-            rc.N++;
-
-            if ( data_in[i].classified_clickbait )
-                rc.FP++;
-            else
-                rc.TN++;
+            cm.N++;
+            if ( c == 1 ) cm.FP++; else cm.TN++;
         }
     }
 
+    /* total population */
+    cm.total = data_amount;
+
+    /* prevalence, prior */
+    cm.prior = (double) cm.P / cm.total;
+
+    /* predicted condition positive */
+    cm.PP = cm.TP + cm.FP;
+    /* predicted condition negative */
+    cm.PN = cm.FN + cm.TN;
+
     /* sensitivity, recall, hit rate, or true positive rate (TPR) */
-    rc.TPR = rc.TP / rc.P;
-
+    cm.TPR = (double) cm.TP / cm.P;
     /* specificity, selectivity or true negative rate (TNR) */
-    rc.TNR = rc.TN / rc.N;
-
+    cm.TNR = (double) cm.TN / cm.N;
     /* precision or positive predictive value (PPV) */
-    rc.PPV = rc.TP / (rc.TP + rc.FP);
-
+    cm.PPV = (double) cm.TP / cm.PP;
     /* negative predictive value (NPV) */
-    rc.NPV = rc.TN / (rc.TN + rc.FN);
-
+    cm.NPV = (double) cm.TN / cm.PN;
     /* miss rate or false negative rate (FNR) */
-    rc.FNR = rc.FN / rc.P;
-
+    cm.FNR = (double) cm.FN / cm.P;
     /* fall-out or false positive rate (FPR) */
-    rc.FPR = rc.FP / rc.N;
-
+    cm.FPR = (double) cm.FP / cm.N;
     /* false discovery rate (FDR) */
-    rc.FDR = rc.FP / (rc.FP + rc.TP);
-
+    cm.FDR = (double) cm.FP / (cm.FP + cm.TP);
     /* false omission rate (FOR) */
-    rc.FOR = rc.FN / (rc.FN + rc.TN);
+    cm.FOR = (double) cm.FN / (cm.FN + cm.TN);
 
     /* accuracy (ACC) */
-    rc.ACC = (rc.TP + rc.TN) / (rc.P + rc.N);
+    cm.ACC = (double) (cm.TP + cm.TN) / cm.total;
+
+    /* positive likelihood ratio (LR+) */
+    cm.LRP = cm.TPR / cm.FPR;
+    /* negative likelihood ratio (LR-) */
+    cm.LRN = cm.FNR / cm.TNR;
+    /* diagnostic odds ratio (DOR) */
+    cm.DOR = cm.LRP / cm.LRN;
 
     /* F1 score */
-    rc.F1 = 2 * rc.PPV * rc.TPR / (rc.PPV + rc.TPR);
-
+    cm.F1 = 2 / (1 / cm.TPR + 1 / cm.PPV);
     /* Matthews correlation coefficient (MCC) */
-    denom = sqrt((rc.TP + rc.FP) * (rc.TP + rc.FN) * (rc.TN + rc.FP) * (rc.TN + rc.FN));
-    rc.MCC = (rc.TP * rc.TN - rc.FP * rc.FN) / (denom != 0 ? denom : 1);
-
+    mcc_denom = (double) sqrt(cm.PP * cm.P * cm.N * cm.PN);
+    cm.MCC = (double) (cm.TP * cm.TN - cm.FP * cm.FN) / (mcc_denom != 0 ? mcc_denom : 1);
     /* Informedness or Bookmaker Informedness (BM) */
-    rc.BM = rc.TPR + rc.TNR - 1;
-
+    cm.BM = cm.TPR + cm.TNR - 1;
     /* Markedness (MK) */
-    rc.MK = rc.PPV + rc.NPV - 1;
+    cm.MK = cm.PPV + cm.NPV - 1;
 
-    return rc;
+    return cm;
 }

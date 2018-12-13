@@ -56,3 +56,22 @@ int _some_sub_function( int parameter, char* string_param );
 
 #endif HEADERNAME_H
 ```
+
+
+Confusion matrix vocabulary
+===========================
+
+| Abbr | Description | Abbr | Description | Abbr | Description | Abbr | Description |
+| ---: | ----------- | ---: | ----------- | ---: | ----------- | ---: | ----------- |
+| CP | Condition positive | TP | True positive | PPV | Positive predictive value, *Precision | TPR | True positive rate, **Recall |
+| CN | Condition negative | FP | False positive | FDR | False discovery rate | FPR | False positive rate, Fall-out |
+| PCP | Predicted condition positive | FN | False negative | FOR | False omission rate | FNR | False negative rate, Miss rate |
+| PCN | Predicted condition negative | TN | True negative | NPV | Negative predictive value | TNR | True negative rate, Selectivity |
+
+| Abbr | Description |
+| ---: | ----------- |
+| ACC | Accuracy |
+| LR+ | Positive likelihood ratio |
+| LR- | Negative likelihood ratio |
+| DOR | Diagnostic odds ratio |
+| MCC | Matthews correlation coefficient [-1, 1] |
