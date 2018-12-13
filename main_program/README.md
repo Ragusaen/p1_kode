@@ -58,6 +58,11 @@ int _some_sub_function( int parameter, char* string_param );
 ```
 
 
+Dataset information
+===================
+TOTAL 474, TRAINING 332 (70.04%), TEST 142 (29.96%)
+
+
 Confusion matrix vocabulary
 ===========================
 

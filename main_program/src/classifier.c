@@ -122,7 +122,7 @@ void _add_feature_count( Headline headline, Feature *features ) {
 }
 
 double _calculate_cb_prob( Headline headline, Feature *features ) {
-    double prob = 0.5;
+    double prob = 1;
     int8_t i;
 
     for ( i = FEATURE_COUNT - 1; i >= 0; i-- ) {
