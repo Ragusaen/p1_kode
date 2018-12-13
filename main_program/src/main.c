@@ -115,24 +115,32 @@ void print_confusion_matrix(ConfusionMatrix cm) {
         "=============================================================================\n"
     );
     printf(
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %-6.4f  %3s: %-6.4f\n"
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n"
         "-----------------------------------------------------------------------------\n"
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %-6.4f  %3s: %-6.4f\n"
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %-6.4f  %3s: %-6.4f\n",
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n"
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n",
         "Total", cm.total, "CP", cm.P, "CN", cm.N, "Prior", cm.prior, "ACC", cm.ACC,
         "PCP", cm.PP, "TP", cm.TP, "FP", cm.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
         "PCN", cm.PN, "FN", cm.FN, "TN", cm.TN, "FOR", cm.FOR, "NPV", cm.NPV
     );
     printf(
         "-----------------------------------------------------------------------------\n"
-        "%13s  |  %5s: %-6.4f  %5s: %-6.4f  |  %5s: %-6.4f\n"
-        "%13s  |  %5s: %-6.4f  %5s: %-6.4f  |  %5s: %-6.4f  %3s: %-6.4f\n"
-        "%13s  |  %28s  |  %5s: %-6.4f  %3s: %-6.4f\n",
+        "%13s  |  %5s: %.4f  %5s: %.4f  |  %5s: %.4f\n"
+        "%13s  |  %5s: %.4f  %5s: %.4f  |  %5s: %.4f  %3s: %.4f\n"
+        "%13s  |  %28s  |  %5s: %.4f  %3s: %.4f\n",
         "", "**TPR", cm.TPR, "FPR", cm.FPR, "LR+", cm.LRP,
         "", "FNR", cm.FNR, "TNR", cm.TNR, "LR-", cm.LRN, "F1", cm.F1,
         "", "", "DOR", cm.DOR, "MCC", cm.MCC
     );
     printf(
         "=============================================================================\n"
+    );
+    printf(
+        "\n"
+        "KEY VALUES:   %s = %.4f   %s = %.4f   %s = %.4f\n"
+        "\n"
+        "              %s = %.4f   %s = %.4f\n"
+        "\n",
+        "Accuracy", cm.ACC, "*Precision", cm.PPV, "**Recall", cm.TPR, "F1 score", cm.F1, "MCC normalized", (cm.MCC + 1) / 2
     );
 }
