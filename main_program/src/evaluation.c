@@ -58,59 +58,62 @@ ROC_point *calculate_ROC(Headline *headlines, int count) {
     return data_points;
 }
 
-ConfusionMatrix calc_confusion_matrix(Headline *data_in, int data_amount) {
+TFPNCounter count_results(Headline *data_in, int data_amount) {
     int i;
-    uint8_t c, l;
-    double mcc_denom;
-    ConfusionMatrix cm;
-
+    uint8_t cls, lbl;
+    TFPNCounter c;
+    
     /* reset counters */
-    cm.P = 0; cm.N = 0; cm.TP = 0; cm.FP = 0; cm.FN = 0; cm.TN = 0;
+    c.TP = 0; c.FP = 0; c.FN = 0; c.TN = 0;
 
     for (i = 0; i < data_amount; i++) {
-        l = data_in[i].labeled_clickbait;
-        c = data_in[i].classified_clickbait;
+        lbl = data_in[i].labeled_clickbait;
+        cls = data_in[i].classified_clickbait;
 
-        if ( l == 1 ) {
-            cm.P++;
-            if ( c == 1 ) cm.TP++; else cm.FN++;
+        if ( lbl == 1 ) {
+            if ( cls == 1 ) c.TP++; else c.FN++;
         }
         else {
-            cm.N++;
-            if ( c == 1 ) cm.FP++; else cm.TN++;
+            if ( cls == 1 ) c.FP++; else c.TN++;
         }
     }
 
-    /* total population */
-    cm.total = data_amount;
+    c.P  = c.TP + c.FN;      /* condition positive */
+    c.N  = c.FP + c.TN;      /* condition negative */
+    c.PP = c.TP + c.FP;     /* predicted condition positive */
+    c.PN = c.FN + c.TN;     /* predicted condition negative */
+    c.total = c.P + c.N;    /* total population */
+
+    return c;
+}
+
+ConfusionMatrix calc_confusion_matrix(Headline *data_in, int data_amount) {
+    double mcc_denom;
+    ConfusionMatrix cm;
+    cm.c = count_results(data_in, data_amount);
 
     /* prevalence, prior */
-    cm.prior = (double) cm.P / cm.total;
-
-    /* predicted condition positive */
-    cm.PP = cm.TP + cm.FP;
-    /* predicted condition negative */
-    cm.PN = cm.FN + cm.TN;
+    cm.prior = (double) cm.c.P / cm.c.total;
 
     /* sensitivity, recall, hit rate, or true positive rate (TPR) */
-    cm.TPR = (double) cm.TP / cm.P;
+    cm.TPR = (double) cm.c.TP / cm.c.P;
     /* specificity, selectivity or true negative rate (TNR) */
-    cm.TNR = (double) cm.TN / cm.N;
+    cm.TNR = (double) cm.c.TN / cm.c.N;
     /* precision or positive predictive value (PPV) */
-    cm.PPV = (double) cm.TP / cm.PP;
+    cm.PPV = (double) cm.c.TP / cm.c.PP;
     /* negative predictive value (NPV) */
-    cm.NPV = (double) cm.TN / cm.PN;
+    cm.NPV = (double) cm.c.TN / cm.c.PN;
     /* miss rate or false negative rate (FNR) */
-    cm.FNR = (double) cm.FN / cm.P;
+    cm.FNR = (double) cm.c.FN / cm.c.P;
     /* fall-out or false positive rate (FPR) */
-    cm.FPR = (double) cm.FP / cm.N;
+    cm.FPR = (double) cm.c.FP / cm.c.N;
     /* false discovery rate (FDR) */
-    cm.FDR = (double) cm.FP / (cm.FP + cm.TP);
+    cm.FDR = (double) cm.c.FP / (cm.c.FP + cm.c.TP);
     /* false omission rate (FOR) */
-    cm.FOR = (double) cm.FN / (cm.FN + cm.TN);
+    cm.FOR = (double) cm.c.FN / (cm.c.FN + cm.c.TN);
 
     /* accuracy (ACC) */
-    cm.ACC = (double) (cm.TP + cm.TN) / cm.total;
+    cm.ACC = (double) (cm.c.TP + cm.c.TN) / cm.c.total;
 
     /* positive likelihood ratio (LR+) */
     cm.LRP = cm.TPR / cm.FPR;
@@ -121,9 +124,12 @@ ConfusionMatrix calc_confusion_matrix(Headline *data_in, int data_amount) {
 
     /* F1 score */
     cm.F1 = 2 / (1 / cm.TPR + 1 / cm.PPV);
+    
     /* Matthews correlation coefficient (MCC) */
-    mcc_denom = (double) sqrt(cm.PP * cm.P * cm.N * cm.PN);
-    cm.MCC = (double) (cm.TP * cm.TN - cm.FP * cm.FN) / (mcc_denom != 0 ? mcc_denom : 1);
+    /* (TP * TN - FP * FN) / sqrt(PP * P * N * PN) */
+    mcc_denom = (double) sqrt(cm.c.PP * cm.c.P * cm.c.N * cm.c.PN);
+    cm.MCC = (double) (cm.c.TP * cm.c.TN - cm.c.FP * cm.c.FN) / (mcc_denom != 0 ? mcc_denom : 1);
+
     /* Informedness or Bookmaker Informedness (BM) */
     cm.BM = cm.TPR + cm.TNR - 1;
     /* Markedness (MK) */
