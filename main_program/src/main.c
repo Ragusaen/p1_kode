@@ -74,23 +74,12 @@ void print_classification( Headline *test_data, int test_count ) {
 }
 
 void print_feature_array( Feature *features ) {
-    int i;
-    char* feature_names[8] = {
-        "has_no_long_word",
-        "has_special_words",
-        "is_short",
-        "has_special_punctuation",
-        "has_pronouns",
-        "has_number",
-        "has_low_average_word_length",
-        "has_stop_words"
-    };
-
+    uint8_t i;
     printf("\n%-30s %10s %10s %10s\n", "Feature", "p(CB|F)", "p(CB|!F)", "p(F)");
 
     for ( i = 0; i < FEATURE_COUNT; i++ ) {
         printf("%-30s %10.4f %10.4f %10.4f\n",
-            feature_names[i],
+            features[i].name,
             features[i].prob_cb_given_feature,
             ( 0.5 - features[i].prob_cb_given_feature * features[i].prob_feature ) / ( 1 - features[i].prob_feature ),
             features[i].prob_feature
@@ -119,9 +108,9 @@ void print_confusion_matrix(ConfusionMatrix cm) {
         "-----------------------------------------------------------------------------\n"
         "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n"
         "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n",
-        "Total", cm.total, "CP", cm.P, "CN", cm.N, "Prior", cm.prior, "ACC", cm.ACC,
-        "PCP", cm.PP, "TP", cm.TP, "FP", cm.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
-        "PCN", cm.PN, "FN", cm.FN, "TN", cm.TN, "FOR", cm.FOR, "NPV", cm.NPV
+        "Total", cm.c.total, "CP", cm.c.P, "CN", cm.c.N, "Prior", cm.prior, "ACC", cm.ACC,
+        "PCP", cm.c.PP, "TP", cm.c.TP, "FP", cm.c.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
+        "PCN", cm.c.PN, "FN", cm.c.FN, "TN", cm.c.TN, "FOR", cm.FOR, "NPV", cm.NPV
     );
     printf(
         "-----------------------------------------------------------------------------\n"

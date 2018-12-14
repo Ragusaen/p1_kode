@@ -1,5 +1,37 @@
 #include "features.h"
 
+Feature* get_features() {
+    uint8_t i = 0;
+    Feature *features;
+    
+    features = (Feature*) calloc(FEATURE_COUNT, sizeof(Feature));
+
+    if ( features == NULL )
+        exit(EXIT_FAILURE);
+
+    _add_feature("has_no_long_word",            has_no_long_word,               &i, features);
+    _add_feature("has_low_average_word_length", has_low_average_word_length,    &i, features);
+    _add_feature("is_short",                    is_short,                       &i, features);
+    _add_feature("has_special_punctuation",     has_special_punctuation,        &i, features);
+    _add_feature("has_colon",                   has_colon,                      &i, features);
+    _add_feature("has_special_words",           has_special_words,              &i, features);
+    _add_feature("has_pronouns",                has_pronouns,                   &i, features);
+    _add_feature("has_stop_words",              has_stop_words,                 &i, features);
+    _add_feature("has_adverbs",                 has_adverbs,                    &i, features);
+    _add_feature("has_no_numbers",              has_no_numbers,                 &i, features);
+    _add_feature("has_caps",                    has_caps,                       &i, features);
+
+    return features;
+}
+
+void _add_feature(char str[], uint8_t (*func)(char*), uint8_t *i, Feature *features) {
+    features[*i].has_feature = func;
+    strncpy(features[*i].name, str, FEATURE_NAME_LEN);
+
+    (*i)++;
+}
+
+
 /**
  * Checks if headline only contains words less than 8 characters long.
  */
@@ -55,18 +87,6 @@ uint8_t has_low_average_word_length(char str_in[]) {
 
 
 /**
- * Checks if headline contains special forward-referencing words.
- */
-
-uint8_t has_special_words(char str_in[]) {
-    char* words[AMOUNT_OF_SPECIAL_WORDS] = {
-        "sådan", "derfor", "denne", "dette", "her", "så meget", "så lidt"
-    };
-    return _str_count_words( str_in, words, AMOUNT_OF_SPECIAL_WORDS ) > 0;
-}
-
-
-/**
  * Checks if headline is less than 40 characters long.
  */
 
@@ -76,11 +96,32 @@ uint8_t is_short(char str_in[]) {
 
 
 /**
- * Checks if headline contains special punctuation, : ! ?
+ * Checks if headline contains special punctuation, ! ?
  */
 
 uint8_t has_special_punctuation(char str_in[]) {
-    return strpbrk(str_in, ":!?") != NULL;
+    return strpbrk(str_in, "!?") != NULL;
+}
+
+
+/**
+ * Checks if headline contains a colon, :
+ */
+
+uint8_t has_colon(char str_in[]) {
+    return strpbrk(str_in, ":") != NULL;
+}
+
+
+/**
+ * Checks if headline contains special forward-referencing words.
+ */
+
+uint8_t has_special_words(char str_in[]) {
+    char* words[AMOUNT_OF_SPECIAL_WORDS] = {
+        "sådan", "derfor", "denne", "dette", "her", "så meget", "så lidt"
+    };
+    return _str_count_words( str_in, words, AMOUNT_OF_SPECIAL_WORDS ) > 0;
 }
 
 
@@ -97,15 +138,6 @@ uint8_t has_pronouns(char str_in[]) {
 
 
 /**
- * Checks if headline contains a number.
- */
-
-uint8_t has_number(char str_in[]) {
-	return strpbrk(str_in, "0123456789") != NULL;
-}
-
-
-/**
  * Checks if headline contains more than 2 stop-words.
  */
 
@@ -114,6 +146,49 @@ uint8_t has_stop_words(char str_in[]) {
         "og", "i", "at", "det", "er", "en", "på", "til", "med", "af", "ikke", "med", "til"
     };
     return _str_count_words( str_in, words, AMOUNT_OF_STOP_WORDS ) > MAX_STOP_WORDS;
+}
+
+
+/**
+ * Checks if headline contains adverbs ending in 'lig' or 'lige'.
+ */
+
+uint8_t has_adverbs(char str_in[]) {
+    return _match_end_of_word( str_in, "lig") || _match_end_of_word( str_in, "lige");
+}
+
+
+/**
+ * Checks if headline contains a number.
+ */
+
+uint8_t has_no_numbers(char str_in[]) {
+	return strpbrk(str_in, "0123456789") == NULL;
+}
+
+
+/**
+ * Checks if headline contains CAPS word longer than 3 characters
+ */
+
+uint8_t has_caps(char str_in[]) {
+    int i, caps_length = 0, curr_length = 0;
+
+    for (i = 0; i <= strlen(str_in); i++) {
+        /* if end-of-str or current char is not uppercase */
+        if (i == strlen(str_in) || !isalpha(str_in[i]) || str_in[i] != toupper(str_in[i])) {
+            if (curr_length > 0) {
+                if (caps_length < curr_length)
+                    caps_length = curr_length;
+                
+                curr_length = 0;
+            }
+        }
+        else
+            curr_length++;
+    }
+
+    return caps_length >= MIN_CAPS_LEN;
 }
 
 
@@ -134,31 +209,6 @@ char * _string_lower( char *str ) {
 
 
 /**
- * Matches a whole word in str.
- */
-
-uint8_t _match_whole_word( char *str, char *word ) {
-    char *ret = strstr(str, word);
-    int before, after;
-
-    while (ret != NULL) {
-        before = (int) (ret - str) - 1;
-        after = before + strlen(word) + 1;
-
-        /* check if match is a whole word and return true */
-        if ( (before == -1 || ispunct(str[before]) || isspace(str[before])) &&
-             (after == strlen(str) || ispunct(str[after]) || isspace(str[after])) )
-            return 1;
-        
-        /* find next match */
-        ret = after != strlen(str) ? strstr(str+after, word) : NULL;
-    }
-
-    return 0;
-}
-
-
-/**
  * Counts matched whole words in str.
  */
 
@@ -173,4 +223,47 @@ int _str_count_words( char *str, char **words, int word_count ) {
 
     free(lower_string);
     return matches;
+}
+
+
+/**
+ * Matches a whole word in str.
+ */
+
+uint8_t _match_whole_word( char *str, char *word ) {
+    return _match_word_condition(str, word, _char_is_punct_or_space, _char_is_punct_or_space);
+}
+
+
+/**
+ * Matches an ending of word.
+ */
+
+uint8_t _match_end_of_word( char *str, char *word ) {
+    return _match_word_condition(str, word, isalpha, _char_is_punct_or_space);
+}
+
+
+uint8_t _match_word_condition(char str[], char word[], int (*comp_before)(int), int (*comp_after)(int)) {
+    char *ret = strstr(str, word);
+    int before, after;
+
+    while (ret != NULL) {
+        before = (int) (ret - str) - 1;
+        after = before + strlen(word) + 1;
+
+        /* check if match is a whole word and return true */
+        if ( (before == -1 || comp_before(str[before])) &&
+             (after == strlen(str) || comp_after(str[after])) )
+            return 1;
+        
+        /* find next match */
+        ret = after != strlen(str) ? strstr(str+after, word) : NULL;
+    }
+
+    return 0;
+}
+
+int _char_is_punct_or_space(int c) {
+    return ispunct(c) || isspace(c);
 }
