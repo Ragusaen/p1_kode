@@ -8,11 +8,9 @@ void classify_array( Headline *headlines, uint16_t headline_count, Feature *feat
 }
 
 int8_t classify( Headline *headline, Feature *features, double threshold ) {
-    double prob;
-
     headline->feature_vector = _get_feature_vector(headline, features);
-    prob = _calculate_cb_prob(headline->feature_vector, features);
-    headline->classified_clickbait = prob >= threshold ? 1 : 0;
+    headline->prob_cb = _calculate_cb_prob(headline->feature_vector, features);
+    headline->classified_clickbait = threshold <= headline->prob_cb;
 
     return headline->classified_clickbait;
 }
@@ -20,7 +18,7 @@ int8_t classify( Headline *headline, Feature *features, double threshold ) {
 Feature* calculate_feature_array( Headline* headlines, uint16_t headline_count ) {
     uint16_t i;
     Feature *features;
-    
+
     features = get_features();
 
     for ( i = 0; i < headline_count; i++ ) {
@@ -97,7 +95,7 @@ double _calculate_cb_prob( uint8_t feature_vector, Feature *features ) {
         }
         else {
             /* multiply with p(CB|!F) */
-            prob *= ( 0.5 - pcbf * pf ) / ( 1 - pf );
+            prob *= _prob_given_not_feature( pcbf, pf );
         }
 
         feature_vector >>= 1;

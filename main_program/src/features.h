@@ -30,7 +30,7 @@ typedef struct Feature {
 } Feature;
 
 Feature* get_features();
-void _add_feature(char str[], uint8_t (*func)(char*), uint8_t *i, Feature *features);
+
 
 uint8_t has_no_long_word(char str_in[]);
 uint8_t has_low_average_word_length(char str_in[]);
@@ -50,5 +50,8 @@ uint8_t _match_whole_word( char *str, char *word );
 uint8_t _match_end_of_word( char *str, char *word );
 uint8_t _match_word_condition(char str[], char word[], int (*comp_before)(int), int (*comp_after)(int));
 int _char_is_punct_or_space(int c);
+
+void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, Feature *features);
+double _prob_given_not_feature( double pcbf, double pf );
 
 #endif

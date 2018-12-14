@@ -11,10 +11,11 @@
 
 /* Struct for headlines for further processing */
 typedef struct Headline {
-  char *title;
+  char    *title;
   uint8_t labeled_clickbait;
   uint8_t classified_clickbait;
   uint8_t feature_vector;
+  double  prob_cb;
 } Headline;
 
 int import_csv(Headline **headlines, int *headline_count, char *file_path);

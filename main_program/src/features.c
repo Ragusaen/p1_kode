@@ -3,32 +3,36 @@
 Feature* get_features() {
     uint8_t i = 0;
     Feature *features;
-    
+
     features = (Feature*) calloc(FEATURE_COUNT, sizeof(Feature));
 
     if ( features == NULL )
         exit(EXIT_FAILURE);
 
-    _add_feature("has_no_long_word",            has_no_long_word,               &i, features);
-    _add_feature("has_low_average_word_length", has_low_average_word_length,    &i, features);
-    _add_feature("is_short",                    is_short,                       &i, features);
-    _add_feature("has_special_punctuation",     has_special_punctuation,        &i, features);
-    _add_feature("has_colon",                   has_colon,                      &i, features);
-    _add_feature("has_special_words",           has_special_words,              &i, features);
-    _add_feature("has_pronouns",                has_pronouns,                   &i, features);
-    _add_feature("has_stop_words",              has_stop_words,                 &i, features);
-    _add_feature("has_adverbs",                 has_adverbs,                    &i, features);
-    _add_feature("has_no_numbers",              has_no_numbers,                 &i, features);
-    _add_feature("has_caps",                    has_caps,                       &i, features);
+    _add_feature("has_no_long_word",            has_no_long_word,               i++, features);
+    _add_feature("has_low_average_word_length", has_low_average_word_length,    i++, features);
+    _add_feature("is_short",                    is_short,                       i++, features);
+    _add_feature("has_special_punctuation",     has_special_punctuation,        i++, features);
+    _add_feature("has_colon",                   has_colon,                      i++, features);
+    _add_feature("has_special_words",           has_special_words,              i++, features);
+    _add_feature("has_pronouns",                has_pronouns,                   i++, features);
+    _add_feature("has_stop_words",              has_stop_words,                 i++, features);
+    _add_feature("has_adverbs",                 has_adverbs,                    i++, features);
+    _add_feature("has_no_numbers",              has_no_numbers,                 i++, features);
+    _add_feature("has_caps",                    has_caps,                       i++, features);
 
     return features;
 }
 
-void _add_feature(char str[], uint8_t (*func)(char*), uint8_t *i, Feature *features) {
-    features[*i].has_feature = func;
-    strncpy(features[*i].name, str, FEATURE_NAME_LEN);
+void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, Feature *features) {
+    features[i].has_feature = func;
+    strncpy(features[i].name, str, FEATURE_NAME_LEN);
 
-    (*i)++;
+    i++;
+}
+
+double _prob_given_not_feature( double pcbf, double pf ) {
+    return ( 0.5 - pcbf * pf ) / ( 1 - pf );
 }
 
 
@@ -180,7 +184,7 @@ uint8_t has_caps(char str_in[]) {
             if (curr_length > 0) {
                 if (caps_length < curr_length)
                     caps_length = curr_length;
-                
+
                 curr_length = 0;
             }
         }
@@ -256,7 +260,7 @@ uint8_t _match_word_condition(char str[], char word[], int (*comp_before)(int), 
         if ( (before == -1 || comp_before(str[before])) &&
              (after == strlen(str) || comp_after(str[after])) )
             return 1;
-        
+
         /* find next match */
         ret = after != strlen(str) ? strstr(str+after, word) : NULL;
     }

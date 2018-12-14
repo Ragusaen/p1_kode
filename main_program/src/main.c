@@ -30,9 +30,10 @@ int main( int argc, const char* argv[] ) {
     int training_count;
     Headline *test_data;
     int test_count;
-    double threshold;
     Feature* feature_probabilities;
     ConfusionMatrix confusion_matrix;
+    double threshold;
+    double ROC_auc;
 
     import_csv( &training_data, &training_count, "res/training.csv" );
     printf("Imported training data, with %d points\n", training_count);
@@ -42,7 +43,6 @@ int main( int argc, const char* argv[] ) {
     print_feature_array( feature_probabilities );
 
     threshold = calculate_threshold(training_data, training_count, feature_probabilities);
-    printf("\nThreshold = %f\n", threshold);
 
     import_csv( &test_data, &test_count, "res/test.csv");
     printf("\nImported test data, with %d points.\n", test_count);
@@ -54,6 +54,9 @@ int main( int argc, const char* argv[] ) {
 
     confusion_matrix = calc_confusion_matrix(test_data, test_count);
     print_confusion_matrix(confusion_matrix);
+
+    ROC_auc = calculate_ROC_AUC( test_data, test_count );
+    printf("ROC AUC: %f\n", ROC_auc );
 
     printf("\nProgram finished, exiting...\n");
 

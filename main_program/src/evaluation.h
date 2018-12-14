@@ -7,6 +7,7 @@
 #include "classifier.h"
 
 #define ROC_POINTS 100
+#define ROC_MARGIN 0.01
 
 typedef struct ROC_point {
     double tpr;
@@ -26,9 +27,11 @@ typedef struct ConfusionMatrix {
 double recall(Headline *data_in, int data_amount);
 double precision(Headline *data_in, int data_amount);
 
-ROC_point *calculate_ROC(Headline *headlines, int count);
+double calculate_ROC_AUC(Headline *headlines, int headline_count);
 
 TFPNCounter count_results(Headline *data_in, int data_amount);
 ConfusionMatrix calc_confusion_matrix(Headline *data_in, int data_amount);
+
+void _get_min_max_probs( Headline *headlines, int count, double *min, double *max );
 
 #endif
