@@ -8,7 +8,7 @@
 
 #include "headline.h"
 #include "features.h"
-#include "double_array.h"
+#include "double.h"
 
 int8_t classify( Headline *headline, Feature *features, double threshold );
 void classify_array( Headline *headlines, uint16_t headline_count, Feature *features, double threshold );
