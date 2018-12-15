@@ -32,17 +32,17 @@ typedef struct Feature {
 Feature* get_features();
 
 
-uint8_t has_no_long_word(char str_in[]);
-uint8_t has_low_average_word_length(char str_in[]);
+uint8_t no_long_word(char str_in[]);
+uint8_t low_average_word_length(char str_in[]);
 uint8_t is_short(char str_in[]);
-uint8_t has_special_punctuation(char str_in[]);
-uint8_t has_colon(char str_in[]);
-uint8_t has_special_words(char str_in[]);
-uint8_t has_pronouns(char str_in[]);
-uint8_t has_stop_words(char str_in[]);
-uint8_t has_adverbs(char str_in[]);
-uint8_t has_no_numbers(char str_in[]);
-uint8_t has_caps(char str_in[]);
+uint8_t special_punctuation(char str_in[]);
+uint8_t colon(char str_in[]);
+uint8_t special_words(char str_in[]);
+uint8_t pronouns(char str_in[]);
+uint8_t stop_words(char str_in[]);
+uint8_t adverbs(char str_in[]);
+uint8_t no_numbers(char str_in[]);
+uint8_t caps(char str_in[]);
 
 char * _string_lower( char *str );
 int _str_count_words( char *str, char **words, int word_count );
