@@ -22,21 +22,23 @@
 void print_classification( Headline *test_data, int test_count );
 void print_feature_array( Feature *features );
 void print_headline_features(uint8_t feature_vector);
+void print_evaluation(EvaluationSet evaluation);
 void print_confusion_matrix(ConfusionMatrix cm);
+void print_key_values_header();
+void print_key_values(ConfusionMatrix cm);
+void print_thin_line();
+void print_thick_line();
 
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {
+    double threshold, auc;
     int training_count;
     int test_count;
     Headline *training_data;
     Headline *test_data;
-
     Feature* feature_probabilities;
-    
-    double threshold, auc;
-    ROC_set roc;
-
     ConfusionMatrix confusion_matrix;
+    EvaluationSet evaluation;
 
     import_csv( &training_data, &training_count, "res/training.csv" );
     printf("Imported training data, with %d points\n", training_count);
@@ -56,14 +58,18 @@ int main( int argc, const char* argv[] ) {
 
     /*print_classification( test_data, test_count );*/
 
-    confusion_matrix = evaluate_classification(test_data, test_count);
+    confusion_matrix = evaluate_classification(test_data, test_count, threshold);
     print_confusion_matrix(confusion_matrix);
 
-    roc = calculate_ROC(test_data, test_count);
-    write_ROC_file(roc);
+    evaluation = evaluate_classifier(test_data, test_count);
+    
+    /*print_evaluation(evaluation);*/
 
-    auc = calculate_AUC(roc);
+    auc = calculate_AUC(evaluation);
     printf("\nROC-AUC = %f\n", auc);
+
+    write_evaluation_file(evaluation, "evaluation/evaluation.csv");
+    printf("\nEvaluation file exported.\n");
 
     printf("\n\nProgram finished, exiting...\n");
 
@@ -106,38 +112,69 @@ void print_headline_features(uint8_t feature_vector) {
     }
 }
 
+
+void print_evaluation(EvaluationSet evaluation) {
+    int i;
+
+    printf("\nCLASSIFIER EVALUATION\n");
+    print_key_values_header();
+
+    for (i = 0; i < evaluation.count; i++) {
+        print_key_values(evaluation.data[i]);
+    }
+
+    print_thick_line();
+}
+
 void print_confusion_matrix(ConfusionMatrix cm) {
+    printf("\nCONFUSION MATRIX\n");
+    print_thick_line();
     printf(
-        "\nCONFUSION MATRIX\n"
-        "=============================================================================\n"
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f    %3s: %.4f\n",
+        "Total", cm.total, "CP", cm.P, "CN", cm.N, "Prior", cm.prior, "ACC", cm.ACC
     );
+    print_thin_line();
     printf(
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n"
-        "-----------------------------------------------------------------------------\n"
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n"
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n",
-        "Total", cm.total, "CP", cm.P, "CN", cm.N, "Prior", cm.prior, "ACC", cm.ACC,
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f    %3s: %.4f\n"
+        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f    %3s: %.4f\n",
         "PCP", cm.PP, "TP", cm.TP, "FP", cm.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
         "PCN", cm.PN, "FN", cm.FN, "TN", cm.TN, "FOR", cm.FOR, "NPV", cm.NPV
     );
+    print_thin_line();
     printf(
-        "-----------------------------------------------------------------------------\n"
         "%13s  |  %5s: %.4f  %5s: %.4f  |  %5s: %.4f\n"
-        "%13s  |  %5s: %.4f  %5s: %.4f  |  %5s: %.4f  %3s: %.4f\n"
-        "%13s  |  %28s  |  %5s: %.4f  %3s: %.4f\n",
+        "%13s  |  %5s: %.4f  %5s: %.4f  |  %5s: %.4f    %3s: %.4f\n"
+        "%13s  |  %28s  |  %5s: %.4f    %3s: %.4f\n",
         "", "**TPR", cm.TPR, "FPR", cm.FPR, "LR+", cm.LRP,
         "", "FNR", cm.FNR, "TNR", cm.TNR, "LR-", cm.LRN, "F1", cm.F1,
         "", "", "DOR", cm.DOR, "MCC", cm.MCC
     );
-    printf(
-        "=============================================================================\n"
+    print_thick_line();
+    printf("%80s\n", "* Precision   ** Recall");
+    printf("\nKEY VALUES\n");
+    print_key_values_header();
+    print_key_values(cm);
+    print_thick_line();
+}
+
+void print_key_values_header() {
+    print_thick_line();
+    printf("%-12s%-12s%-12s%-12s%-12s%-12s%-12s\n",
+        "Threshold", "Accuracy", "Precision", "Recall", "Fall-out", "F1 score", "MCC"
     );
-    printf(
-        "\n"
-        "KEY VALUES:   %s = %.4f   %s = %.4f   %s = %.4f\n"
-        "\n"
-        "              %s = %.4f   %s = %.4f\n"
-        "\n",
-        "Accuracy", cm.ACC, "*Precision", cm.PPV, "**Recall", cm.TPR, "F1 score", cm.F1, "MCC normalized", (cm.MCC + 1) / 2
+    print_thin_line();
+}
+
+void print_key_values(ConfusionMatrix cm) {
+    printf("%-12.6f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f\n",
+        cm.threshold, cm.ACC, cm.PPV, cm.TPR, cm.FPR, cm.F1, cm.MCC
     );
+}
+
+void print_thin_line() {
+    printf("--------------------------------------------------------------------------------\n");
+}
+
+void print_thick_line() {
+    printf("================================================================================\n");
 }

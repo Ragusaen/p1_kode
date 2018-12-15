@@ -1,11 +1,100 @@
 #include "evaluation.h"
 
-ConfusionMatrix evaluate_classification(Headline *headlines, int headline_count) {
+EvaluationSet evaluate_classifier(Headline *headlines, int headline_count) {
+    int i, P = 0, N = 0, TP = 0, FP = 0, output_i = 0, prob_count = 0;
+    double prev_prob = 1;
+    EvaluationSet set;
+
+    qsort(headlines, headline_count, sizeof(Headline), _compare_probabilities);
+
+    for (i = 0; i < headline_count; i++) {
+        if (headlines[i].labeled_clickbait) P++; else N++;
+        if (headlines[i].prob_cb != prev_prob) {
+            prev_prob = headlines[i].prob_cb;
+            prob_count++;
+        }
+    }
+    
+    prob_count++;
+
+    set.data = (ConfusionMatrix*) calloc(prob_count, sizeof(ConfusionMatrix));
+    set.count = prob_count;
+
+    prev_prob = 1;
+
+    for (i = 0; i < headline_count; i++) {
+        if (headlines[i].prob_cb != prev_prob) {
+            set.data[output_i++] = _calc_confusion_matrix(P, N, TP, FP, prev_prob);
+            prev_prob = headlines[i].prob_cb;
+        }
+
+        if (headlines[i].labeled_clickbait) TP++; else FP++;
+    }
+
+    set.data[output_i] = _calc_confusion_matrix(P, N, TP, FP, prev_prob);
+
+    return set;
+}
+
+ConfusionMatrix evaluate_classification(Headline *headlines, int headline_count, double threshold) {
     ResultCounter result = _count_true_false_positives(headlines, headline_count);
     
-    ConfusionMatrix cm = _calc_confusion_matrix(result.P, result.N, result.TP, result.FP);
+    ConfusionMatrix cm = _calc_confusion_matrix(result.P, result.N, result.TP, result.FP, threshold);
 
     return cm;
+}
+
+double calculate_AUC(EvaluationSet set) {
+    int i;
+    double auc = 0.0, x_1, y_1, x_2, y_2;
+
+    x_1 = set.data[0].FPR;
+    y_1 = set.data[0].TPR;
+
+    for (i = 1; i < set.count; i++) {
+        x_2 = set.data[i].FPR;
+        y_2 = set.data[i].TPR;
+
+        auc += 0.5 * (x_2 - x_1) * (y_2 + y_1);
+
+        x_1 = x_2; y_1 = y_2;
+    }
+
+    return auc;
+}
+
+void write_evaluation_file(EvaluationSet set, char *filename) {
+    int i, col = 0;
+    FILE *fp;
+    CSV_data csv_line[7];
+
+    if((fp = fopen(filename, "w")) == NULL) {
+        printf("Error: Couldn't open file \"%s\".\n", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    csv_line[col++].s = "Threshold";
+    csv_line[col++].s = "Accuracy";
+    csv_line[col++].s = "Precision";
+    csv_line[col++].s = "Recall";
+    csv_line[col++].s = "Fall-out";
+    csv_line[col++].s = "F1 score";
+    csv_line[col++].s = "MCC";
+    write_csv_line(fp, "%s%s%s%s%s%s%s", csv_line);
+
+    for (i = 0; i < set.count; i++) {
+        col = 0;
+        csv_line[col++].f = set.data[i].threshold;
+        csv_line[col++].f = set.data[i].ACC;
+        csv_line[col++].f = set.data[i].PPV;
+        csv_line[col++].f = set.data[i].TPR;
+        csv_line[col++].f = set.data[i].FPR;
+        csv_line[col++].f = set.data[i].F1;
+        csv_line[col++].f = set.data[i].MCC;
+        write_csv_line(fp, "%f%f%f%f%f%f%f", csv_line);
+    }
+
+    fclose(fp);
 }
 
 ResultCounter _count_true_false_positives(Headline *headlines, int headline_count) {
@@ -33,9 +122,11 @@ ResultCounter _count_true_false_positives(Headline *headlines, int headline_coun
     return c;
 }
 
-ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP) {
+ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold) {
     double mcc_denom;
     ConfusionMatrix cm;
+
+    cm.threshold = threshold;
     
     cm.P = P; cm.N = N; cm.TP = TP; cm.FP = FP;
 
@@ -57,9 +148,9 @@ ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP) {
     /* specificity, selectivity or true negative rate (TNR) */
     cm.TNR = 1 - cm.FPR;
     /* precision or positive predictive value (PPV) */
-    cm.PPV = (double) cm.TP / cm.PP;
+    cm.PPV = cm.PP != 0 ? (double) cm.TP / cm.PP : 0;
     /* negative predictive value (NPV) */
-    cm.NPV = (double) cm.TN / cm.PN;
+    cm.NPV = cm.PN != 0 ? (double) cm.TN / cm.PN : 0;
     /* false discovery rate (FDR) */
     cm.FDR = 1 - cm.PPV;
     /* false omission rate (FOR) */
@@ -91,83 +182,12 @@ ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP) {
     return cm;
 }
 
-ROC_set calculate_ROC(Headline *headlines, int headline_count) {
-    int i, P = 0, N = 0, TP = 0, FP = 0, ROC_index = 0, prob_count = 0;
-    double prev_prob = 1;
-    ROC_set set;
+int _compare_probabilities(const void *pa, const void *pb) {
+    Headline a = *(Headline*)pa, b = *(Headline*)pb;
 
-    qsort(headlines, headline_count, sizeof(Headline), _compare_probabilities);
-
-    for (i = 0; i < headline_count; i++) {
-        if (headlines[i].labeled_clickbait) P++; else N++;
-        if (headlines[i].prob_cb != prev_prob) {
-            prev_prob = headlines[i].prob_cb;
-            prob_count++;
-        }
-    }
-    
-    prob_count++;
-
-    set.points = (ROC_point*) calloc(prob_count, sizeof(ROC_point));
-    set.count = prob_count;
-
-    prev_prob = 1;
-
-    for (i = 0; i < headline_count; i++) {
-        if (headlines[i].prob_cb != prev_prob) {
-            set.points[ROC_index].TPR = (double) TP / P;
-            set.points[ROC_index].FPR = (double) FP / N;
-            set.points[ROC_index].threshold = prev_prob;
-            prev_prob = headlines[i].prob_cb;
-            ROC_index++;
-        }
-
-        if (headlines[i].labeled_clickbait) TP++; else FP++;
-    }
-
-    set.points[ROC_index].TPR = (double) TP / P;
-    set.points[ROC_index].FPR = (double) FP / N;
-    set.points[ROC_index].threshold = prev_prob;
-
-    return set;
-}
-
-double calculate_AUC(ROC_set roc) {
-    int i;
-    double auc = 0.0, x_1, y_1, x_2, y_2;
-
-    x_1 = roc.points[0].FPR;
-    y_1 = roc.points[0].TPR;
-
-    for (i = 1; i < roc.count; i++) {
-        x_2 = roc.points[i].FPR;
-        y_2 = roc.points[i].TPR;
-
-        auc += 0.5 * (x_2 - x_1) * (y_2 + y_1);
-
-        x_1 = x_2; y_1 = y_2;
-    }
-
-    return auc;
-}
-
-void write_ROC_file(ROC_set roc) {
-    int i;
-    FILE *fp;
-
-    fp = fopen("roc_curve.csv", "w");
-
-    fprintf(fp, "Threshold;FPR;TPR\n");
-
-    for (i = 0; i < roc.count; i++) {
-        fprintf(fp, "%s;%s;%s\n",
-            double_to_string(roc.points[i].threshold, 6, ','),
-            double_to_string(roc.points[i].FPR, 6, ','),
-            double_to_string(roc.points[i].TPR, 6, ',')
-        );
-    }
-
-    fclose(fp);
+    if (a.prob_cb < b.prob_cb) return 1;
+    else if (a.prob_cb > b.prob_cb) return -1;
+    else return 0;
 }
 
 /* DEPRECATED
@@ -229,11 +249,3 @@ void _get_min_max_probs( Headline *headlines, int count, double *min, double *ma
     }
 }
 */
-
-int _compare_probabilities(const void *pa, const void *pb) {
-    Headline a = *(Headline*)pa, b = *(Headline*)pb;
-
-    if (a.prob_cb < b.prob_cb) return 1;
-    else if (a.prob_cb > b.prob_cb) return -1;
-    else return 0;
-}

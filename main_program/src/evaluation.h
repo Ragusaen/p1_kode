@@ -5,9 +5,11 @@
 #include <stdlib.h>
 #include "headline.h"
 #include "classifier.h"
-#include "double.h"
+#include "export_csv.h"
+
 
 #define ROC_POINTS 100
+
 
 typedef struct ResultCounter {
     uint16_t P, N, TP, FP;
@@ -23,28 +25,21 @@ typedef struct EvaluationSet {
     int count;
 } EvaluationSet;
 
-typedef struct ROC_point {
-    double TPR, FPR, threshold;
-} ROC_point;
 
-typedef struct ROC_set {
-    ROC_point* points;
-    int count;
-} ROC_set;
+EvaluationSet evaluate_classifier(Headline *headlines, int headline_count);
+ConfusionMatrix evaluate_classification(Headline *headlines, int headline_count, double threshold);
 
-ConfusionMatrix evaluate_classification(Headline *headlines, int headline_count);
+double calculate_AUC(EvaluationSet set);
+
+void write_evaluation_file(EvaluationSet set, char *filename);
+
 ResultCounter _count_true_false_positives(Headline *headlines, int headline_count);
-ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP);
-
-ROC_set calculate_ROC(Headline *headlines, int headline_count);
-double calculate_AUC(ROC_set roc);
-void write_ROC_file(ROC_set roc);
+ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold);
+int _compare_probabilities(const void *pa, const void *pb);
 
 /* DEPRECATED
 double calculate_ROC_AUC(Headline *headlines, int headline_count);
 void _get_min_max_probs( Headline *headlines, int count, double *min, double *max );
 */
-
-int _compare_probabilities(const void *pa, const void *pb);
 
 #endif
