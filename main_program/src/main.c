@@ -19,7 +19,6 @@
 #include "features.h"
 #include "evaluation.h"
 
-void print_classification( Headline *test_data, int test_count );
 void print_feature_array( Feature *features );
 void print_headline_features(uint8_t feature_vector);
 void print_evaluation(EvaluationSet evaluation);
