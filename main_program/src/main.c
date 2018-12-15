@@ -56,8 +56,6 @@ int main( int argc, const char* argv[] ) {
     classify_array( test_data, test_count, feature_probabilities, threshold );
     printf("Test data successfully classified.\n");
 
-    /*print_classification( test_data, test_count );*/
-
     confusion_matrix = evaluate_classification(test_data, test_count, threshold);
     print_confusion_matrix(confusion_matrix);
 
@@ -74,19 +72,6 @@ int main( int argc, const char* argv[] ) {
     printf("\n\nProgram finished, exiting...\n");
 
     return EXIT_SUCCESS;
-}
-
-void print_classification( Headline *test_data, int test_count ) {
-    int i;
-    for ( i = 0; i < test_count; i++ ) {
-        int k = ( test_data[i].labeled_clickbait == test_data[i].classified_clickbait );
-        int l = test_data[i].classified_clickbait;
-        printf("%s classified as %s\t\"%s\"\n",
-            k ? "[correctly]" : " [falsely] ",
-            l ? "[clickbait]    " : "[non-clickbait]",
-            test_data[i].title
-        );
-    }
 }
 
 void print_feature_array( Feature *features ) {
