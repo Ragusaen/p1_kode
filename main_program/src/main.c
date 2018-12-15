@@ -26,14 +26,17 @@ void print_confusion_matrix(ConfusionMatrix cm);
 
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {
-    Headline *training_data;
     int training_count;
-    Headline *test_data;
     int test_count;
+    Headline *training_data;
+    Headline *test_data;
+
     Feature* feature_probabilities;
+    
+    double threshold, auc;
+    ROC_set roc;
+
     ConfusionMatrix confusion_matrix;
-    double threshold;
-    double ROC_auc;
 
     import_csv( &training_data, &training_count, "res/training.csv" );
     printf("Imported training data, with %d points\n", training_count);
@@ -43,6 +46,7 @@ int main( int argc, const char* argv[] ) {
     print_feature_array( feature_probabilities );
 
     threshold = calculate_threshold(training_data, training_count, feature_probabilities);
+    printf("\nCalculated median threshold: %f\n", threshold);
 
     import_csv( &test_data, &test_count, "res/test.csv");
     printf("\nImported test data, with %d points.\n", test_count);
@@ -52,13 +56,16 @@ int main( int argc, const char* argv[] ) {
 
     /*print_classification( test_data, test_count );*/
 
-    confusion_matrix = calc_confusion_matrix(test_data, test_count);
+    confusion_matrix = evaluate_classification(test_data, test_count);
     print_confusion_matrix(confusion_matrix);
 
-    ROC_auc = calculate_ROC_AUC( test_data, test_count );
-    printf("ROC AUC: %f\n", ROC_auc );
+    roc = calculate_ROC(test_data, test_count);
+    write_ROC_file(roc);
 
-    printf("\nProgram finished, exiting...\n");
+    auc = calculate_AUC(roc);
+    printf("\nROC-AUC = %f\n", auc);
+
+    printf("\n\nProgram finished, exiting...\n");
 
     return EXIT_SUCCESS;
 }
@@ -78,18 +85,16 @@ void print_classification( Headline *test_data, int test_count ) {
 
 void print_feature_array( Feature *features ) {
     uint8_t i;
-    printf("\n%-30s %10s %10s %10s\n", "Feature", "p(CB|F)", "p(CB|!F)", "p(F)");
+    printf("\n%-23s %10s %10s %10s\n", "Feature", "p(CB|F)", "p(CB|!F)", "p(F)");
 
     for ( i = 0; i < FEATURE_COUNT; i++ ) {
-        printf("%-30s %10.4f %10.4f %10.4f\n",
+        printf("%-23s %10.4f %10.4f %10.4f\n",
             features[i].name,
             features[i].prob_cb_given_feature,
             ( 0.5 - features[i].prob_cb_given_feature * features[i].prob_feature ) / ( 1 - features[i].prob_feature ),
             features[i].prob_feature
         );
     }
-
-    printf("\n");
 }
 
 void print_headline_features(uint8_t feature_vector) {
@@ -111,9 +116,9 @@ void print_confusion_matrix(ConfusionMatrix cm) {
         "-----------------------------------------------------------------------------\n"
         "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n"
         "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f  %3s: %.4f\n",
-        "Total", cm.c.total, "CP", cm.c.P, "CN", cm.c.N, "Prior", cm.prior, "ACC", cm.ACC,
-        "PCP", cm.c.PP, "TP", cm.c.TP, "FP", cm.c.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
-        "PCN", cm.c.PN, "FN", cm.c.FN, "TN", cm.c.TN, "FOR", cm.FOR, "NPV", cm.NPV
+        "Total", cm.total, "CP", cm.P, "CN", cm.N, "Prior", cm.prior, "ACC", cm.ACC,
+        "PCP", cm.PP, "TP", cm.TP, "FP", cm.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
+        "PCN", cm.PN, "FN", cm.FN, "TN", cm.TN, "FOR", cm.FOR, "NPV", cm.NPV
     );
     printf(
         "-----------------------------------------------------------------------------\n"
