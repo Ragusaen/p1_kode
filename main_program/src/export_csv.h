@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "double.h"
 
 #define CSV_COMMA ';'
 #define CSV_DECIMAL ','

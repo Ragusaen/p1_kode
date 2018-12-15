@@ -35,5 +35,13 @@ void write_csv_line(FILE *fp, char *formats, CSV_data *data) {
 }
 
 char* _csv_double(double n) {
-    return (char*) double_to_string(n, 6, CSV_DECIMAL);
+    char *str = malloc(16), *token;
+
+    sprintf(str, "%.6f", n);
+
+    /* replace '.' with ',' */
+    token = strchr(str, '.');
+    token[0] = CSV_DECIMAL;
+
+    return str;
 }

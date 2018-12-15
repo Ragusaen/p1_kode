@@ -1,37 +1,5 @@
 #include "double.h"
 
-char* double_to_string(double n, int decimals, char separator) {
-    int x, i, decimal_i = decimals;
-    double d;
-    char *str;
-    char temp[10];
-
-    x = (int)n;
-    d = n - (double)x;
-
-    str = malloc(11 + decimals);
-    memset(str, '\0', strlen(str) + 1);
-
-    itoa(x, str, 10);
-    i = strlen(str);
-  
-    if (decimals != 0) { 
-        str[i++] = separator;
-        d = d * pow(10, decimals);
-  
-        itoa((int)d, temp, 10);
-
-        while (decimal_i > strlen(temp)) {
-            str[i++] = '0';
-            decimal_i--;
-        }
-
-        strcpy(str + i, temp);
-    }
-
-    return str;
-}
-
 DoubleArrayCalc double_array_calc(double arr[], int n) {
     DoubleArrayCalc calc;
 
