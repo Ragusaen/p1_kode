@@ -1,60 +1,35 @@
 #include "classifier.h"
 
-void classify_array( Headline *headlines, uint16_t headline_count, Feature *features, double threshold ) {
+void classify_dataset(DataSet set, FeatureSet featureset, double threshold ) {
     uint16_t i;
-    for ( i = 0; i < headline_count; i++ ) {
-        classify( headlines + i, features, threshold );
+    
+    for ( i = 0; i < set.count; i++ ) {
+        classify( set.data + i, featureset, threshold );
     }
 }
 
-int8_t classify( Headline *headline, Feature *features, double threshold ) {
-    headline->feature_vector = _get_feature_vector(headline, features);
-    headline->prob_cb = _calculate_cb_prob(headline->feature_vector, features);
+int8_t classify(Headline *headline, FeatureSet featureset, double threshold) {
+    headline->feature_vector = _get_feature_vector(headline, featureset);
+    headline->prob_cb = _calculate_cb_prob(headline->feature_vector, featureset);
     headline->classified_clickbait = threshold <= headline->prob_cb;
 
     return headline->classified_clickbait;
 }
 
-Feature* calculate_feature_array( Headline* headlines, uint16_t headline_count ) {
-    uint16_t i;
-    Feature *features;
-
-    features = get_features();
-
-    for ( i = 0; i < headline_count; i++ ) {
-        _add_feature_count( headlines[i], features );
-    }
-
-    for ( i = 0; i < FEATURE_COUNT; i++ ) {
-        /* p(F) = |F|/|A| */
-        features[i].prob_feature = (double)features[i].feature_count / headline_count;
-
-        if (features[i].feature_count > 0) {
-            /* p(CB|F) = |CB & F| / |F| */
-            features[i].prob_cb_given_feature = (double)features[i].feature_cb_count / features[i].feature_count;
-        }
-        else {
-            features[i].prob_cb_given_feature = 0.5;
-        }
-    }
-
-    return features;
-}
-
-double calculate_threshold(Headline* headlines, uint16_t headline_count, Feature *features) {
+double calculate_threshold(DataSet set, FeatureSet featureset) {
     int i, count_cb = 0, count_ncb = 0;
     double threshold = 0.5, prob, *cb_probs, *ncb_probs;
 
-    cb_probs = malloc(headline_count * 0.5 * sizeof(double));
-    ncb_probs = malloc(headline_count * 0.5 * sizeof(double));
+    cb_probs = malloc(set.count * 0.5 * sizeof(double));
+    ncb_probs = malloc(set.count * 0.5 * sizeof(double));
 
     if (cb_probs == NULL || ncb_probs == NULL)
         exit(EXIT_FAILURE);
 
-    for (i = 0; i < headline_count; i++) {
-        prob = _calculate_cb_prob(_get_feature_vector(headlines + i, features), features);
+    for (i = 0; i < set.count; i++) {
+        prob = _calculate_cb_prob(_get_feature_vector(set.data + i, featureset), featureset);
 
-        if (headlines[i].labeled_clickbait)
+        if (set.data[i].labeled_clickbait)
             cb_probs[count_cb++] = prob;
         else
             ncb_probs[count_ncb++] = prob;
@@ -69,24 +44,24 @@ double calculate_threshold(Headline* headlines, uint16_t headline_count, Feature
     return threshold;
 }
 
-uint8_t _get_feature_vector( Headline *headline, Feature *features ) {
+uint8_t _get_feature_vector(Headline *headline, FeatureSet featureset) {
     uint8_t i, feature_vector;
 
-    for ( i = 0; i < FEATURE_COUNT; i++ ) {
+    for ( i = 0; i < featureset.count; i++ ) {
         feature_vector <<= 1;
-        feature_vector += features[i].has_feature(headline->title);
+        feature_vector += featureset.features[i].has_feature(headline->title);
     }
 
     return feature_vector;
 }
 
-double _calculate_cb_prob( uint8_t feature_vector, Feature *features ) {
+double _calculate_cb_prob(uint8_t feature_vector, FeatureSet featureset) {
     double prob = 1;
     int8_t i;
 
-    for ( i = FEATURE_COUNT - 1; i >= 0; i-- ) {
-        double pcbf = features[i].prob_cb_given_feature;
-        double pf = features[i].prob_feature;
+    for ( i = featureset.count - 1; i >= 0; i-- ) {
+        double pcbf = featureset.features[i].prob_cb_given_feature;
+        double pf = featureset.features[i].prob_feature;
 
         /* if headline has feature */
         if ( feature_vector % 2 == 1 ) { /* Only check first bit */
@@ -104,15 +79,6 @@ double _calculate_cb_prob( uint8_t feature_vector, Feature *features ) {
     return prob;
 }
 
-void _add_feature_count( Headline headline, Feature *features ) {
-    uint8_t j;
-    for ( j = 0; j < FEATURE_COUNT; j++ ) {
-        if ( features[j].has_feature(headline.title) ) {
-            features[j].feature_count++;
-
-            if ( headline.labeled_clickbait ) {
-                features[j].feature_cb_count++;
-            }
-        }
-    }
+double _prob_given_not_feature( double pcbf, double pf ) {
+    return ( 0.5 - pcbf * pf ) / ( 1 - pf );
 }

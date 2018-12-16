@@ -11,17 +11,21 @@
 
 /* Struct for headlines for further processing */
 typedef struct Headline {
-  char    *title;
-  uint8_t labeled_clickbait;
-  uint8_t classified_clickbait;
-  uint8_t feature_vector;
-  double  prob_cb;
+    char    *title;
+    uint8_t labeled_clickbait;
+    uint8_t classified_clickbait;
+    uint8_t feature_vector;
+    double  prob_cb;
 } Headline;
 
-int import_csv(Headline **headlines, int *headline_count, char *file_path);
+typedef struct DataSet {
+    Headline *data;
+    int count;
+} DataSet;
 
-FILE *_open_file();
-int _count_headlines(FILE *dataset);
-void _read_headlines(FILE *dataset, Headline headlines[], int headline_count );
+DataSet import_headline_csv(char file_path[]);
+
+int _count_headlines(FILE *fp);
+void _read_headlines(FILE *fp, DataSet dataset);
 
 #endif

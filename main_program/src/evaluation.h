@@ -24,15 +24,15 @@ typedef struct EvaluationSet {
 } EvaluationSet;
 
 
-EvaluationSet evaluate_classifier(Headline *headlines, int headline_count);
-ConfusionMatrix evaluate_classification(Headline *headlines, int headline_count, double threshold);
+EvaluationSet evaluate_classifier(DataSet dataset);
+ConfusionMatrix evaluate_classification(DataSet dataset, double threshold);
 
 double calculate_AUC(EvaluationSet set);
 
 void write_evaluation_file(EvaluationSet set, char *filename);
 
-ResultCounter _count_thresholds_positives_negatives(Headline *headlines, int headline_count);
-ResultCounter _count_true_false_positives(Headline *headlines, int headline_count);
+ResultCounter _count_thresholds_positives_negatives(DataSet dataset);
+ResultCounter _count_true_false_positives(DataSet dataset);
 ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold);
 int _sort_by_probability_desc(const void *pa, const void *pb);
 

@@ -1,38 +1,33 @@
 #include "features.h"
 
-Feature* get_features() {
+FeatureSet get_features() {
     uint8_t i = 0;
-    Feature *features;
+    FeatureSet set;
 
-    features = (Feature*) calloc(FEATURE_COUNT, sizeof(Feature));
+    set.count = 11;
+    set.features = (Feature*) calloc(set.count, sizeof(Feature));
 
-    if ( features == NULL )
+    if ( set.features == NULL )
         exit(EXIT_FAILURE);
 
-    _add_feature("no_long_word",            no_long_word,               i++, features);
-    _add_feature("low_average_word_length", low_average_word_length,    i++, features);
-    _add_feature("is_short",                is_short,                   i++, features);
-    _add_feature("special_punctuation",     special_punctuation,        i++, features);
-    _add_feature("colon",                   colon,                      i++, features);
-    _add_feature("special_words",           special_words,              i++, features);
-    _add_feature("pronouns",                pronouns,                   i++, features);
-    _add_feature("stop_words",              stop_words,                 i++, features);
-    _add_feature("adverbs",                 adverbs,                    i++, features);
-    _add_feature("no_numbers",              no_numbers,                 i++, features);
-    _add_feature("caps",                    caps,                       i++, features);
+    _add_feature("no_long_word",            no_long_word,               i++, set);
+    _add_feature("low_average_word_length", low_average_word_length,    i++, set);
+    _add_feature("is_short",                is_short,                   i++, set);
+    _add_feature("special_punctuation",     special_punctuation,        i++, set);
+    _add_feature("colon",                   colon,                      i++, set);
+    _add_feature("special_words",           special_words,              i++, set);
+    _add_feature("pronouns",                pronouns,                   i++, set);
+    _add_feature("stop_words",              stop_words,                 i++, set);
+    _add_feature("adverbs",                 adverbs,                    i++, set);
+    _add_feature("no_numbers",              no_numbers,                 i++, set);
+    _add_feature("caps",                    caps,                       i++, set);
 
-    return features;
+    return set;
 }
 
-void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, Feature *features) {
-    features[i].has_feature = func;
-    strncpy(features[i].name, str, FEATURE_NAME_LEN);
-
-    i++;
-}
-
-double _prob_given_not_feature( double pcbf, double pf ) {
-    return ( 0.5 - pcbf * pf ) / ( 1 - pf );
+void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, FeatureSet set) {
+    set.features[i].has_feature = func;
+    strncpy(set.features[i].name, str, FEATURE_NAME_LEN);
 }
 
 

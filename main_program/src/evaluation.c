@@ -1,25 +1,25 @@
 #include "evaluation.h"
 
-EvaluationSet evaluate_classifier(Headline *headlines, int headline_count) {
+EvaluationSet evaluate_classifier(DataSet dataset) {
     int i, output_i;
     double prev_prob = 1;
     EvaluationSet set;
     ResultCounter c;
 
-    qsort(headlines, headline_count, sizeof(Headline), _sort_by_probability_desc);
+    qsort(dataset.data, dataset.count, sizeof(Headline), _sort_by_probability_desc);
 
-    c = _count_thresholds_positives_negatives(headlines, headline_count);
+    c = _count_thresholds_positives_negatives(dataset);
     
     set.count = c.thresholds;
     set.data = (ConfusionMatrix*) calloc(set.count, sizeof(ConfusionMatrix));
     
-    for (i = 0; i < headline_count; i++) {
-        if (headlines[i].prob_cb != prev_prob) {
+    for (i = 0; i < dataset.count; i++) {
+        if (dataset.data[i].prob_cb != prev_prob) {
             set.data[output_i++] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, prev_prob);
-            prev_prob = headlines[i].prob_cb;
+            prev_prob = dataset.data[i].prob_cb;
         }
 
-        if (headlines[i].labeled_clickbait) c.TP++; else c.FP++;
+        if (dataset.data[i].labeled_clickbait) c.TP++; else c.FP++;
     }
 
     set.data[output_i] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, prev_prob);
@@ -27,8 +27,8 @@ EvaluationSet evaluate_classifier(Headline *headlines, int headline_count) {
     return set;
 }
 
-ConfusionMatrix evaluate_classification(Headline *headlines, int headline_count, double threshold) {
-    ResultCounter result = _count_true_false_positives(headlines, headline_count);
+ConfusionMatrix evaluate_classification(DataSet dataset, double threshold) {
+    ResultCounter result = _count_true_false_positives(dataset);
     
     ConfusionMatrix cm = _calc_confusion_matrix(result.P, result.N, result.TP, result.FP, threshold);
 
@@ -110,17 +110,17 @@ void write_evaluation_file(EvaluationSet set, char *filename) {
     fclose(fp);
 }
 
-ResultCounter _count_thresholds_positives_negatives(Headline *headlines, int headline_count) {
+ResultCounter _count_thresholds_positives_negatives(DataSet dataset) {
     int i;
     double prev_prob = 1;
     ResultCounter c;
 
     c.P = 0; c.N = 0; c.TP = 0; c.FP = 0; c.thresholds = 1;
 
-    for (i = 0; i < headline_count; i++) {
-        if (headlines[i].labeled_clickbait) c.P++; else c.N++;
-        if (headlines[i].prob_cb != prev_prob) {
-            prev_prob = headlines[i].prob_cb;
+    for (i = 0; i < dataset.count; i++) {
+        if (dataset.data[i].labeled_clickbait) c.P++; else c.N++;
+        if (dataset.data[i].prob_cb != prev_prob) {
+            prev_prob = dataset.data[i].prob_cb;
             c.thresholds++;
         }
     }
@@ -128,7 +128,7 @@ ResultCounter _count_thresholds_positives_negatives(Headline *headlines, int hea
     return c;
 }
 
-ResultCounter _count_true_false_positives(Headline *headlines, int headline_count) {
+ResultCounter _count_true_false_positives(DataSet dataset) {
     int i;
     uint8_t cls, lbl;
     ResultCounter c;
@@ -136,9 +136,9 @@ ResultCounter _count_true_false_positives(Headline *headlines, int headline_coun
     /* reset counters */
     c.P = 0; c.N = 0; c.TP = 0; c.FP = 0;
 
-    for (i = 0; i < headline_count; i++) {
-        lbl = headlines[i].labeled_clickbait;
-        cls = headlines[i].classified_clickbait;
+    for (i = 0; i < dataset.count; i++) {
+        lbl = dataset.data[i].labeled_clickbait;
+        cls = dataset.data[i].classified_clickbait;
 
         if (lbl == 1) {
             c.P++;

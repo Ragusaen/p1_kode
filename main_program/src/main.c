@@ -17,10 +17,10 @@
 #include "classifier.h"
 #include "headline.h"
 #include "features.h"
+#include "train.h"
 #include "evaluation.h"
 
-void print_feature_array( Feature *features );
-void print_headline_features(uint8_t feature_vector);
+void print_feature_array(FeatureSet featureset);
 void print_evaluation(EvaluationSet evaluation);
 void print_confusion_matrix(ConfusionMatrix cm);
 void print_key_values_header();
@@ -31,34 +31,31 @@ void print_thick_line();
 /* Entrypoint for the program */
 int main( int argc, const char* argv[] ) {
     double threshold, auc;
-    int training_count;
-    int test_count;
-    Headline *training_data;
-    Headline *test_data;
-    Feature* feature_probabilities;
+    DataSet training_set, test_set;
+    FeatureSet trained_features;
     ConfusionMatrix confusion_matrix;
     EvaluationSet evaluation;
 
-    import_csv( &training_data, &training_count, "res/training.csv" );
-    printf("Imported training data, with %d points\n", training_count);
+    training_set = import_headline_csv("res/training.csv");
+    printf("Imported training data, with %d points\n", training_set.count);
 
-    feature_probabilities = calculate_feature_array( training_data, training_count );
-    printf("\nCalculated feature array\n");
-    print_feature_array( feature_probabilities );
+    trained_features = train_features(training_set);
+    printf("\nTrained features\n");
+    print_feature_array(trained_features);
 
-    threshold = calculate_threshold(training_data, training_count, feature_probabilities);
+    threshold = calculate_threshold(training_set, trained_features);
     printf("\nCalculated median threshold: %f\n", threshold);
 
-    import_csv( &test_data, &test_count, "res/test.csv");
-    printf("\nImported test data, with %d points.\n", test_count);
+    test_set = import_headline_csv("res/test.csv");
+    printf("\nImported test data, with %d points.\n", test_set.count);
 
-    classify_array( test_data, test_count, feature_probabilities, threshold );
+    classify_dataset( test_set, trained_features, threshold );
     printf("Test data successfully classified.\n");
 
-    confusion_matrix = evaluate_classification(test_data, test_count, threshold);
+    confusion_matrix = evaluate_classification(test_set, threshold);
     print_confusion_matrix(confusion_matrix);
 
-    evaluation = evaluate_classifier(test_data, test_count);
+    evaluation = evaluate_classifier(test_set);
     
     /*print_evaluation(evaluation);*/
 
@@ -73,26 +70,17 @@ int main( int argc, const char* argv[] ) {
     return EXIT_SUCCESS;
 }
 
-void print_feature_array( Feature *features ) {
+void print_feature_array(FeatureSet featureset) {
     uint8_t i;
     printf("\n%-23s %10s %10s %10s\n", "Feature", "p(CB|F)", "p(CB|!F)", "p(F)");
 
-    for ( i = 0; i < FEATURE_COUNT; i++ ) {
+    for ( i = 0; i < featureset.count; i++ ) {
         printf("%-23s %10.4f %10.4f %10.4f\n",
-            features[i].name,
-            features[i].prob_cb_given_feature,
-            ( 0.5 - features[i].prob_cb_given_feature * features[i].prob_feature ) / ( 1 - features[i].prob_feature ),
-            features[i].prob_feature
+            featureset.features[i].name,
+            featureset.features[i].prob_cb_given_feature,
+            ( 0.5 - featureset.features[i].prob_cb_given_feature * featureset.features[i].prob_feature ) / ( 1 - featureset.features[i].prob_feature ),
+            featureset.features[i].prob_feature
         );
-    }
-}
-
-void print_headline_features(uint8_t feature_vector) {
-    int i;
-
-    for (i = FEATURE_COUNT - 1; i >= 0; i--) {
-        printf("%u", feature_vector % 2 == 1 ? 1 : 0);
-        feature_vector >>= 1;
     }
 }
 
