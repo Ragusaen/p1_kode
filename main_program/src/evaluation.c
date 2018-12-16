@@ -1,36 +1,66 @@
 #include "evaluation.h"
 
+/**
+ * Evaluates the classifier at all thresholds, outputs an EvaluationSet with an array of Confusion Matrixes.
+ * 
+ * @param dataset   a dataset with calculated probabilities
+ */
+
 EvaluationSet evaluate_classifier(DataSet dataset) {
     int i, output_i;
-    double prev_prob = 1;
+    double threshold = 1;
     EvaluationSet set;
     ResultCounter c;
 
+    /* sort the dataset from highest to lowest probability */
     qsort(dataset.data, dataset.count, sizeof(Headline), _sort_by_probability_desc);
 
+    /* count the number of thresholds (unique probabilities), positives, and negatives */
     c = _count_thresholds_positives_negatives(dataset);
     
+    /* initialize the EvaluationSet */
     set.count = c.thresholds;
-    set.data = (ConfusionMatrix*) calloc(set.count, sizeof(ConfusionMatrix));
+    if ((set.data = (ConfusionMatrix*) calloc(set.count, sizeof(ConfusionMatrix))) == NULL) {
+        printf("Error: Couldn't allocate memory\n");
+        exit(EXIT_FAILURE);
+    };
     
     for (i = 0; i < dataset.count; i++) {
-        if (dataset.data[i].prob_cb != prev_prob) {
-            set.data[output_i++] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, prev_prob);
-            prev_prob = dataset.data[i].prob_cb;
+        /* if the probability is not equal to current threshold */
+        if (dataset.data[i].prob_cb != threshold) {
+            /* add ConfusionMatrix with current counts to EvaluationSet */
+            set.data[output_i++] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
+            /* set new threshold */
+            threshold = dataset.data[i].prob_cb;
         }
 
+        /* count item as either TP or FP */
         if (dataset.data[i].labeled_clickbait) c.TP++; else c.FP++;
     }
 
-    set.data[output_i] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, prev_prob);
+    /* add the last ConfusionMatrix with the final count */
+    set.data[output_i] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
 
     return set;
 }
 
+
+/**
+ * Evaluates a specific classification.
+ * 
+ * @param dataset       a classified dataset
+ * @param threshold     will be passed to the ConfusionMatrix
+ */
+
 ConfusionMatrix evaluate_classification(DataSet dataset, double threshold) {
-    ResultCounter result = _count_true_false_positives(dataset);
+    ResultCounter result;
+    ConfusionMatrix cm;
+
+    /* count all positives, negatives, and all true and false positives */
+    result = _count_true_false_positives(dataset);
     
-    ConfusionMatrix cm = _calc_confusion_matrix(result.P, result.N, result.TP, result.FP, threshold);
+    /* create Confusion Matrix */
+    cm = _calc_confusion_matrix(result.P, result.N, result.TP, result.FP, threshold);
 
     return cm;
 }
@@ -39,7 +69,7 @@ ConfusionMatrix evaluate_classification(DataSet dataset, double threshold) {
 /**
  * Calculates the area under the ROC curve.
  * 
- * @param set   contains a data array of Confusion Matrixes.
+ * @param set   an EvaluationSet which contains an array of Confusion Matrixes.
  */
 
 double calculate_AUC(EvaluationSet set) {
@@ -65,6 +95,14 @@ double calculate_AUC(EvaluationSet set) {
 
     return auc;
 }
+
+
+/**
+ * Exports the EvaluationSet to a CSV file.
+ * 
+ * @param set       an EvaluationSet created by evaluate_classifier
+ * @param filename  the path and filename for the CSV file
+ */
 
 void write_evaluation_file(EvaluationSet set, char *filename) {
     int i, col = 0;
@@ -110,23 +148,38 @@ void write_evaluation_file(EvaluationSet set, char *filename) {
     fclose(fp);
 }
 
+
+/**
+ * Counts the number of thresholds (unique probabilities), positives, and negatives
+ */
+
 ResultCounter _count_thresholds_positives_negatives(DataSet dataset) {
     int i;
-    double prev_prob = 1;
+    double threshold = 1;
     ResultCounter c;
 
+    /* reset counts */
     c.P = 0; c.N = 0; c.TP = 0; c.FP = 0; c.thresholds = 1;
 
     for (i = 0; i < dataset.count; i++) {
-        if (dataset.data[i].labeled_clickbait) c.P++; else c.N++;
-        if (dataset.data[i].prob_cb != prev_prob) {
-            prev_prob = dataset.data[i].prob_cb;
+        /* count unique probabilities (thresholds) */
+        if (dataset.data[i].prob_cb != threshold) {
+            threshold = dataset.data[i].prob_cb;
             c.thresholds++;
         }
+        
+        /* count item as either positive or negative */
+        if (dataset.data[i].labeled_clickbait) c.P++; else c.N++;
     }
 
     return c;
 }
+
+
+/**
+ * Counts all positives, negatives, and all true and false positives.
+ * Requires a classified dataset.
+ */
 
 ResultCounter _count_true_false_positives(DataSet dataset) {
     int i;
@@ -152,6 +205,17 @@ ResultCounter _count_true_false_positives(DataSet dataset) {
 
     return c;
 }
+
+
+/**
+ * Calculates and returns a Confusion Matrix.
+ * 
+ * @param P     number of positives
+ * @param N     number of negatives
+ * @param TP    number of true positives
+ * @param FP    number of false positives
+ * @threshold   the threshold used
+ */
 
 ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold) {
     double mcc_denom;
@@ -212,6 +276,12 @@ ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double thre
 
     return cm;
 }
+
+
+/**
+ * A comparison function for use with qsort.
+ * Sorts headlines by probability in descending order.
+ */
 
 int _sort_by_probability_desc(const void *pa, const void *pb) {
     Headline a = *(Headline*)pa, b = *(Headline*)pb;
