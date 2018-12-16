@@ -9,9 +9,10 @@
 #define CSV_COMMA ';'
 #define CSV_DECIMAL ','
 #define CSV_FORMAT_LEN 10
+#define CSV_MAX_STRING_LEN 255
 
 typedef union CSV_data {
-    int d; char c; double f; char *s;
+    int d; char c; double f; char s[CSV_MAX_STRING_LEN];
 } CSV_data;
 
 void write_csv_line(FILE *fp, char *formats, CSV_data *data);
