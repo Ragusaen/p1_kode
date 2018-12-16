@@ -3,16 +3,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "headline.h"
 #include "classifier.h"
 #include "export_csv.h"
 
 
-#define ROC_POINTS 100
-
-
 typedef struct ResultCounter {
-    uint16_t P, N, TP, FP;
+    uint16_t P, N, TP, FP, thresholds;
 } ResultCounter;
 
 typedef struct ConfusionMatrix {
@@ -33,13 +31,9 @@ double calculate_AUC(EvaluationSet set);
 
 void write_evaluation_file(EvaluationSet set, char *filename);
 
+ResultCounter _count_thresholds_positives_negatives(Headline *headlines, int headline_count);
 ResultCounter _count_true_false_positives(Headline *headlines, int headline_count);
 ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold);
-int _compare_probabilities(const void *pa, const void *pb);
-
-/* DEPRECATED
-double calculate_ROC_AUC(Headline *headlines, int headline_count);
-void _get_min_max_probs( Headline *headlines, int count, double *min, double *max );
-*/
+int _sort_by_probability_desc(const void *pa, const void *pb);
 
 #endif
