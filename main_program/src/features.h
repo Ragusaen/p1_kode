@@ -33,7 +33,7 @@ typedef struct FeatureSet {
     int count;
 } FeatureSet;
 
-FeatureSet get_features();
+FeatureSet import_features();
 void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, FeatureSet features);
 
 uint8_t no_long_word(char str_in[]);

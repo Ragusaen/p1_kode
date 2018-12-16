@@ -1,6 +1,6 @@
 #include "features.h"
 
-FeatureSet get_features() {
+FeatureSet import_features() {
     uint8_t i = 0;
     FeatureSet set;
 

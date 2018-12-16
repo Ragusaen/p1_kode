@@ -2,7 +2,7 @@
 
 FeatureSet train_features(DataSet set) {
     uint16_t i;
-    FeatureSet featureset = get_features();
+    FeatureSet featureset = import_features();
 
     for ( i = 0; i < set.count; i++ ) {
         _add_feature_count(set.data[i], featureset);
