@@ -5,19 +5,13 @@ DataSet import_headline_csv(char file_path[]) {
     DataSet dataset;
 
     /* Open file with clickbait headlines */
-    if((fp = fopen(file_path, "r")) == NULL) {
-        printf("Error reading file \"%s\".\n", file_path);
-        exit(EXIT_FAILURE);
-    }
+    if((fp = fopen(file_path, "r")) == NULL) fatal("Couldn't load dataset");
 
     /* Count the number of headlines */
     dataset.count = _count_headlines(fp);
 
     /* Allocate memory for the struct */
-    if ((dataset.data = (Headline *) malloc(dataset.count * sizeof(Headline))) == NULL) {
-        printf("Error allocating memory for headlines.\n");
-        exit(EXIT_FAILURE);
-    }
+    if ((dataset.data = (Headline *) malloc(dataset.count * sizeof(Headline))) == NULL) fatal_error();
     
     /* Import all data from the file and insert it to the struct */
     _read_headlines(fp, dataset);
@@ -65,10 +59,7 @@ void _read_headlines(FILE *fp, DataSet dataset) {
             buffer[j - 1] = '\0';
 
             /* Allocate memory for the content */
-            if ((dataset.data[i].content = (char*) malloc(j - 1)) == NULL ) {
-                printf("Couldn't allocate memory for headline %d\n", i );
-                exit(EXIT_FAILURE);
-            }
+            if ((dataset.data[i].content = (char*) malloc(j - 1)) == NULL ) fatal_error();
 
             /* Copies headline i into the struct */
             strcpy(dataset.data[i].content, (buffer + 1));
@@ -76,9 +67,6 @@ void _read_headlines(FILE *fp, DataSet dataset) {
             sscanf(buffer + j + 1, " %d", &cb_label);
             dataset.data[i].labeled_clickbait = cb_label;
         }
-        else {
-            printf("Couldn't read file line %d\n", i );
-            exit(EXIT_FAILURE);
-        }
+        else fatal_error();
     }
 }

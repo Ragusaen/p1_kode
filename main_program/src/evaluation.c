@@ -20,10 +20,7 @@ EvaluationSet evaluate_classifier(DataSet dataset) {
     
     /* initialize the EvaluationSet */
     set.count = c.thresholds;
-    if ((set.data = (ConfusionMatrix*) calloc(set.count, sizeof(ConfusionMatrix))) == NULL) {
-        printf("Error: Couldn't allocate memory\n");
-        exit(EXIT_FAILURE);
-    };
+    if ((set.data = (ConfusionMatrix*) calloc(set.count, sizeof(ConfusionMatrix))) == NULL) fatal_error();
     
     for (i = 0; i < dataset.count; i++) {
         /* if the probability is not equal to current threshold */
@@ -105,44 +102,19 @@ double calculate_AUC(EvaluationSet set) {
  */
 
 void write_evaluation_file(EvaluationSet set, char *filename) {
-    int i, col = 0;
+    int i;
     FILE *fp;
-    CSV_data row[11]; /* data array with 11 columns */
 
-    if((fp = fopen(filename, "w")) == NULL) {
-        printf("Error: Couldn't open file \"%s\".\n", filename);
-        exit(EXIT_FAILURE);
-    }
+    if((fp = fopen(filename, "w")) == NULL) fatal("Couldn't write to evaluation file");
 
     /* write header row */
-    strcpy(row[col++].s, "Threshold");
-    strcpy(row[col++].s, "TP");
-    strcpy(row[col++].s, "FP");
-    strcpy(row[col++].s, "FN");
-    strcpy(row[col++].s, "TN");
-    strcpy(row[col++].s, "Accuracy");
-    strcpy(row[col++].s, "Precision");
-    strcpy(row[col++].s, "Recall");
-    strcpy(row[col++].s, "Fall-out");
-    strcpy(row[col++].s, "F1 score");
-    strcpy(row[col++].s, "MCC");
-    write_csv_line(fp, "%s %s %s %s %s %s %s %s %s %s %s", row);
+    fprintf(fp, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
+        "Threshold", "TP", "FP", "FN", "TN", "Accuracy", "Precision", "Recall", "Fall-out", "F1 score", "MCC"
+    );
 
     /* write data */
     for (i = 0; i < set.count; i++) {
-        col = 0;
-        row[col++].f = set.data[i].threshold;
-        row[col++].d = set.data[i].TP;
-        row[col++].d = set.data[i].FP;
-        row[col++].d = set.data[i].FN;
-        row[col++].d = set.data[i].TN;
-        row[col++].f = set.data[i].ACC;
-        row[col++].f = set.data[i].PPV;
-        row[col++].f = set.data[i].TPR;
-        row[col++].f = set.data[i].FPR;
-        row[col++].f = set.data[i].F1;
-        row[col++].f = set.data[i].MCC;
-        write_csv_line(fp, "%f %d %d %d %d %f %f %f %f %f %f", row);
+        _write_evaluation_data(fp, set.data[i]);
     }
 
     fclose(fp);
@@ -289,4 +261,42 @@ int _sort_by_probability_desc(const void *pa, const void *pb) {
     if (a.prob_cb < b.prob_cb) return 1;
     else if (a.prob_cb > b.prob_cb) return -1;
     else return 0;
+}
+
+
+/**
+ * Writes a ConfusionMatrix to a CSV file.
+ */
+
+void _write_evaluation_data(FILE *fp, ConfusionMatrix data) {
+    fprintf(fp, "%s;%d;%d;%d;%d;%s;%s;%s;%s;%s;%s\n",
+        _csv_double(data.threshold),
+        data.TP, data.FP, data.FN, data.TN,
+        _csv_double(data.ACC),
+        _csv_double(data.PPV),
+        _csv_double(data.TPR),
+        _csv_double(data.FPR),
+        _csv_double(data.F1),
+        _csv_double(data.MCC)
+    );
+}
+
+
+/**
+ * Converts a double to a string with ',' as the decimal separator.
+ */
+
+char* _csv_double(double n) {
+    char *str, *token;
+    
+    if ((str = malloc(16)) == NULL) fatal_error();
+
+    /* convert double to string */
+    sprintf(str, "%.6f", n);
+
+    /* replace the decimal separator */
+    token = strchr(str, '.');
+    token[0] = ',';
+
+    return str;
 }

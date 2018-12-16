@@ -35,14 +35,19 @@ void print_thick_line();
 /* Entrypoint for the program */
 int main(int argc, const char* argv[])
 {
+    int i;
     double threshold, auc;
     DataSet training_set, test_set;
     FeatureSet trained_features;
     ConfusionMatrix confusion_matrix;
     EvaluationSet evaluation;
 
+    for (i = 0; i < argc; i++) {
+        printf("argv \"%s\"\n", argv[i]);
+    }
+
     training_set = import_headline_csv("res/training.csv");
-    printf("Imported training data, with %d points\n", training_set.count);
+    printf("\nImported training data, with %d points\n", training_set.count);
 
     trained_features = train_features(training_set);
     printf("\nTrained features\n");

@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "errorhandler.h"
+
 #define FEATURE_NAME_LEN 28
 
 #define MIN_WORD_LENGTH 8

@@ -1,13 +1,15 @@
+#ifndef HEADLINE_H
+#define HEADLINE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef HEADLINE_H
-#define HEADLINE_H
+#include "errorhandler.h"
+#include "features.h"
 
 #define FILE_BUFFER_LENGTH 256
 
-#include "features.h"
 
 /* Struct for headlines for further processing */
 typedef struct Headline {
@@ -23,9 +25,11 @@ typedef struct DataSet {
     int count;
 } DataSet;
 
+
 DataSet import_headline_csv(char file_path[]);
 
 int _count_headlines(FILE *fp);
 void _read_headlines(FILE *fp, DataSet dataset);
+
 
 #endif

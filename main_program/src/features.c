@@ -5,10 +5,7 @@ FeatureSet import_features() {
     FeatureSet set;
 
     set.count = 11;
-    set.features = (Feature*) calloc(set.count, sizeof(Feature));
-
-    if ( set.features == NULL )
-        exit(EXIT_FAILURE);
+    if ((set.features = (Feature*) calloc(set.count, sizeof(Feature))) == NULL) fatal_error();
 
     _add_feature("no_long_word",            no_long_word,               i++, set);
     _add_feature("low_average_word_length", low_average_word_length,    i++, set);

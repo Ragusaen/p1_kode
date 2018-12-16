@@ -4,9 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "errorhandler.h"
 #include "headline.h"
 #include "classifier.h"
-#include "export_csv.h"
 
 
 typedef struct ResultCounter {
@@ -35,5 +36,8 @@ ResultCounter _count_thresholds_positives_negatives(DataSet dataset);
 ResultCounter _count_true_false_positives(DataSet dataset);
 ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold);
 int _sort_by_probability_desc(const void *pa, const void *pb);
+
+void _write_evaluation_data(FILE *fp, ConfusionMatrix data);
+char* _csv_double(double n);
 
 #endif
