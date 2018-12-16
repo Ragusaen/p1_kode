@@ -23,8 +23,7 @@ double calculate_threshold(DataSet set, FeatureSet featureset) {
     cb_probs = malloc(set.count * 0.5 * sizeof(double));
     ncb_probs = malloc(set.count * 0.5 * sizeof(double));
 
-    if (cb_probs == NULL || ncb_probs == NULL)
-        exit(EXIT_FAILURE);
+    if (cb_probs == NULL || ncb_probs == NULL) fatal_error();
 
     for (i = 0; i < set.count; i++) {
         prob = _calculate_cb_prob(_get_feature_vector(set.data[i].content, featureset), featureset);

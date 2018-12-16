@@ -38,17 +38,18 @@ typedef struct FeatureSet {
 FeatureSet import_features();
 void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, FeatureSet features);
 
-uint8_t no_long_word(char str_in[]);
-uint8_t low_average_word_length(char str_in[]);
-uint8_t is_short(char str_in[]);
-uint8_t special_punctuation(char str_in[]);
-uint8_t colon(char str_in[]);
-uint8_t special_words(char str_in[]);
-uint8_t pronouns(char str_in[]);
-uint8_t stop_words(char str_in[]);
-uint8_t adverbs(char str_in[]);
-uint8_t no_numbers(char str_in[]);
-uint8_t caps(char str_in[]);
+uint8_t f_no_long_word(char str_in[]);
+uint8_t f_low_average_word_length(char str_in[]);
+uint8_t f_is_short(char str_in[]);
+uint8_t f_special_punctuation(char str_in[]);
+uint8_t f_quotation(char str_in[]);
+uint8_t f_colon(char str_in[]);
+uint8_t f_special_words(char str_in[]);
+uint8_t f_pronouns(char str_in[]);
+uint8_t f_stop_words(char str_in[]);
+uint8_t f_adverbs(char str_in[]);
+uint8_t f_no_numbers(char str_in[]);
+uint8_t f_caps(char str_in[]);
 
 char * _string_lower( char *str );
 int _str_count_words( char *str, char **words, int word_count );

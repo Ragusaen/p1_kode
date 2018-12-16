@@ -4,20 +4,22 @@ FeatureSet import_features() {
     uint8_t i = 0;
     FeatureSet set;
 
-    set.count = 11;
-    if ((set.features = (Feature*) calloc(set.count, sizeof(Feature))) == NULL) fatal_error();
+    if ((set.features = (Feature*) calloc(12, sizeof(Feature))) == NULL) fatal_error();
 
-    _add_feature("no_long_word",            no_long_word,               i++, set);
-    _add_feature("low_average_word_length", low_average_word_length,    i++, set);
-    _add_feature("is_short",                is_short,                   i++, set);
-    _add_feature("special_punctuation",     special_punctuation,        i++, set);
-    _add_feature("colon",                   colon,                      i++, set);
-    _add_feature("special_words",           special_words,              i++, set);
-    _add_feature("pronouns",                pronouns,                   i++, set);
-    _add_feature("stop_words",              stop_words,                 i++, set);
-    _add_feature("adverbs",                 adverbs,                    i++, set);
-    _add_feature("no_numbers",              no_numbers,                 i++, set);
-    _add_feature("caps",                    caps,                       i++, set);
+    _add_feature("no_long_word",            f_no_long_word,             i++, set);
+    _add_feature("low_average_word_length", f_low_average_word_length,  i++, set);
+    _add_feature("is_short",                f_is_short,                 i++, set);
+    _add_feature("special_punctuation",     f_special_punctuation,      i++, set);
+    /*_add_feature("quotation",               f_quotation,                i++, set);*/
+    /*_add_feature("colon",                   f_colon,                    i++, set);*/
+    _add_feature("special_words",           f_special_words,            i++, set);
+    _add_feature("pronouns",                f_pronouns,                 i++, set);
+    _add_feature("stop_words",              f_stop_words,               i++, set);
+    _add_feature("adverbs",                 f_adverbs,                  i++, set);
+    _add_feature("no_numbers",              f_no_numbers,               i++, set);
+    _add_feature("caps",                    f_caps,                     i++, set);
+    
+    set.count = i;
 
     return set;
 }
@@ -32,7 +34,7 @@ void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, FeatureSet set)
  * Checks if headline only contains words less than 8 characters long.
  */
 
-uint8_t no_long_word(char str_in[]) {
+uint8_t f_no_long_word(char str_in[]) {
     int longest_word_length = 0,
         curr_word_length = 0,
         i;
@@ -58,7 +60,7 @@ uint8_t no_long_word(char str_in[]) {
  * Checks if the headline's average word length is below 4.5.
  */
 
-uint8_t low_average_word_length(char str_in[]) {
+uint8_t f_low_average_word_length(char str_in[]) {
     int i = 0,
         word_length_sum = 0,
         word_count = 0,
@@ -86,7 +88,7 @@ uint8_t low_average_word_length(char str_in[]) {
  * Checks if headline is less than 40 characters long.
  */
 
-uint8_t is_short(char str_in[]) {
+uint8_t f_is_short(char str_in[]) {
     return strlen(str_in) < MIN_TOTAL_LENGTH;
 }
 
@@ -95,8 +97,17 @@ uint8_t is_short(char str_in[]) {
  * Checks if headline contains special punctuation, ! ?
  */
 
-uint8_t special_punctuation(char str_in[]) {
+uint8_t f_special_punctuation(char str_in[]) {
     return strpbrk(str_in, "!?") != NULL;
+}
+
+
+/**
+ * Checks if headline contains quotation
+ */
+
+uint8_t f_quotation(char str_in[]) {
+    return strpbrk(str_in, "\"'") != NULL;
 }
 
 
@@ -104,7 +115,7 @@ uint8_t special_punctuation(char str_in[]) {
  * Checks if headline contains a colon, :
  */
 
-uint8_t colon(char str_in[]) {
+uint8_t f_colon(char str_in[]) {
     return strpbrk(str_in, ":") != NULL;
 }
 
@@ -113,7 +124,7 @@ uint8_t colon(char str_in[]) {
  * Checks if headline contains special forward-referencing words.
  */
 
-uint8_t special_words(char str_in[]) {
+uint8_t f_special_words(char str_in[]) {
     char* words[AMOUNT_OF_SPECIAL_WORDS] = {
         "sådan", "derfor", "denne", "dette", "her", "så meget", "så lidt"
     };
@@ -125,7 +136,7 @@ uint8_t special_words(char str_in[]) {
  * Checks if headline contains pronouns.
  */
 
-uint8_t pronouns(char str_in[]) {
+uint8_t f_pronouns(char str_in[]) {
     char *words[AMOUNT_OF_PRONOUNS] = {
         "du", "han", "hun", "hende", "din", "jeg", "os", "de", "min", "dit"
     };
@@ -137,7 +148,7 @@ uint8_t pronouns(char str_in[]) {
  * Checks if headline contains more than 2 stop-words.
  */
 
-uint8_t stop_words(char str_in[]) {
+uint8_t f_stop_words(char str_in[]) {
     char *words[AMOUNT_OF_STOP_WORDS] = {
         "og", "i", "at", "det", "er", "en", "på", "til", "med", "af", "ikke", "med", "til"
     };
@@ -149,7 +160,7 @@ uint8_t stop_words(char str_in[]) {
  * Checks if headline contains adverbs ending in 'lig' or 'lige'.
  */
 
-uint8_t adverbs(char str_in[]) {
+uint8_t f_adverbs(char str_in[]) {
     return _match_end_of_word( str_in, "lig") || _match_end_of_word( str_in, "lige");
 }
 
@@ -158,7 +169,7 @@ uint8_t adverbs(char str_in[]) {
  * Checks if headline contains a number.
  */
 
-uint8_t no_numbers(char str_in[]) {
+uint8_t f_no_numbers(char str_in[]) {
 	return strpbrk(str_in, "0123456789") == NULL;
 }
 
@@ -167,7 +178,7 @@ uint8_t no_numbers(char str_in[]) {
  * Checks if headline contains CAPS word longer than 3 characters
  */
 
-uint8_t caps(char str_in[]) {
+uint8_t f_caps(char str_in[]) {
     int i, caps_length = 0, curr_length = 0;
 
     for (i = 0; i <= strlen(str_in); i++) {

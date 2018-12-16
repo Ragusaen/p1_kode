@@ -46,7 +46,7 @@ int main(int argc, const char* argv[])
         printf("argv \"%s\"\n", argv[i]);
     }
 
-    training_set = import_headline_csv("res/training.csv");
+    training_set = import_headline_csv("res/training.dataset");
     printf("\nImported training data, with %d points\n", training_set.count);
 
     trained_features = train_features(training_set);
@@ -56,7 +56,7 @@ int main(int argc, const char* argv[])
     threshold = calculate_threshold(training_set, trained_features);
     printf("\nCalculated median threshold: %f\n", threshold);
 
-    test_set = import_headline_csv("res/test.csv");
+    test_set = import_headline_csv("res/test.dataset");
     printf("\nImported test data, with %d points.\n", test_set.count);
 
     classify_dataset( test_set, trained_features, threshold );
@@ -72,7 +72,7 @@ int main(int argc, const char* argv[])
     auc = calculate_AUC(evaluation);
     printf("\nROC-AUC = %f\n", auc);
 
-    write_evaluation_file(evaluation, "evaluation/evaluation.csv");
+    write_evaluation_file(evaluation, "evaluation.csv");
     printf("\nEvaluation file exported.\n");
 
     printf("\n\nProgram finished, exiting...\n");

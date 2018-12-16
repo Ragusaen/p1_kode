@@ -30,6 +30,7 @@ DataSet import_headline_csv(char file_path[]);
 
 int _count_headlines(FILE *fp);
 void _read_headlines(FILE *fp, DataSet dataset);
+void _parse_headline(Headline *headline, char *buffer, char *token);
 
 
 #endif

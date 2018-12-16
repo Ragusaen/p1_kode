@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <math.h>
 
+#include "errorhandler.h"
 #include "headline.h"
 #include "features.h"
 #include "double.h"
