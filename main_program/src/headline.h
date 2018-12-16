@@ -11,7 +11,7 @@
 
 /* Struct for headlines for further processing */
 typedef struct Headline {
-    char    *title;
+    char    *content;
     uint8_t labeled_clickbait;
     uint8_t classified_clickbait;
     uint8_t feature_vector;

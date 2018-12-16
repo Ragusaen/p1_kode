@@ -7,7 +7,7 @@
 /* This controls wether or not the program is in debugging mode for conditional compilation */
 #define DEBUG_MODE 1
 
-#define PROBABILITY_THRESHOLD 0.003448
+#define PROBABILITY_THRESHOLD 0.000409
 
 /* Include libraries */
 #include <stdlib.h>
@@ -20,16 +20,21 @@
 #include "train.h"
 #include "evaluation.h"
 
-void print_feature_array(FeatureSet featureset);
+void print_trained_features(FeatureSet featureset);
+void print_feature(Feature feature);
+
 void print_evaluation(EvaluationSet evaluation);
 void print_confusion_matrix(ConfusionMatrix cm);
+
 void print_key_values_header();
 void print_key_values(ConfusionMatrix cm);
+
 void print_thin_line();
 void print_thick_line();
 
 /* Entrypoint for the program */
-int main( int argc, const char* argv[] ) {
+int main(int argc, const char* argv[])
+{
     double threshold, auc;
     DataSet training_set, test_set;
     FeatureSet trained_features;
@@ -41,7 +46,7 @@ int main( int argc, const char* argv[] ) {
 
     trained_features = train_features(training_set);
     printf("\nTrained features\n");
-    print_feature_array(trained_features);
+    print_trained_features(trained_features);
 
     threshold = calculate_threshold(training_set, trained_features);
     printf("\nCalculated median threshold: %f\n", threshold);
@@ -70,22 +75,29 @@ int main( int argc, const char* argv[] ) {
     return EXIT_SUCCESS;
 }
 
-void print_feature_array(FeatureSet featureset) {
+void print_trained_features(FeatureSet featureset)
+{
     uint8_t i;
     printf("\n%-23s %10s %10s %10s\n", "Feature", "p(CB|F)", "p(CB|!F)", "p(F)");
 
     for ( i = 0; i < featureset.count; i++ ) {
-        printf("%-23s %10.4f %10.4f %10.4f\n",
-            featureset.features[i].name,
-            featureset.features[i].prob_cb_given_feature,
-            ( 0.5 - featureset.features[i].prob_cb_given_feature * featureset.features[i].prob_feature ) / ( 1 - featureset.features[i].prob_feature ),
-            featureset.features[i].prob_feature
-        );
+        print_feature(featureset.features[i]);
     }
 }
 
+void print_feature(Feature feature)
+{
+    printf("%-23s %10.4f %10.4f %10.4f\n",
+        feature.name,
+        feature.prob_cb_given_feature,
+        ( 0.5 - feature.prob_cb_given_feature * feature.prob_feature ) / ( 1 - feature.prob_feature ),
+        feature.prob_feature
+    );
+}
 
-void print_evaluation(EvaluationSet evaluation) {
+
+void print_evaluation(EvaluationSet evaluation)
+{
     int i;
 
     printf("\nCLASSIFIER EVALUATION\n");
@@ -98,7 +110,8 @@ void print_evaluation(EvaluationSet evaluation) {
     print_thick_line();
 }
 
-void print_confusion_matrix(ConfusionMatrix cm) {
+void print_confusion_matrix(ConfusionMatrix cm)
+{
     printf("\nCONFUSION MATRIX\n");
     print_thick_line();
     printf(
@@ -123,13 +136,15 @@ void print_confusion_matrix(ConfusionMatrix cm) {
     );
     print_thick_line();
     printf("%80s\n", "* Precision   ** Recall");
+
     printf("\nKEY VALUES\n");
     print_key_values_header();
     print_key_values(cm);
     print_thick_line();
 }
 
-void print_key_values_header() {
+void print_key_values_header()
+{
     print_thick_line();
     printf("%-12s%-12s%-12s%-12s%-12s%-12s%-12s\n",
         "Threshold", "Accuracy", "Precision", "Recall", "Fall-out", "F1 score", "MCC"
@@ -137,16 +152,19 @@ void print_key_values_header() {
     print_thin_line();
 }
 
-void print_key_values(ConfusionMatrix cm) {
+void print_key_values(ConfusionMatrix cm)
+{
     printf("%-12.6f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f\n",
         cm.threshold, cm.ACC, cm.PPV, cm.TPR, cm.FPR, cm.F1, cm.MCC
     );
 }
 
-void print_thin_line() {
+void print_thin_line()
+{
     printf("--------------------------------------------------------------------------------\n");
 }
 
-void print_thick_line() {
+void print_thick_line()
+{
     printf("================================================================================\n");
 }
