@@ -17,7 +17,7 @@ typedef struct Headline {
     uint8_t labeled_clickbait;
     uint8_t classified_clickbait;
     uint8_t feature_vector;
-    double  prob_cb;
+    double  prob_score;
 } Headline;
 
 typedef struct DataSet {
