@@ -1,3 +1,4 @@
 main_program/build/*
 *.o
 *.h.gch
+*.bin
