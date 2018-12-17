@@ -1,6 +1,9 @@
 #include "classifier.h"
 
-void classify_dataset(DataSet set, FeatureSet featureset, double threshold) {
+
+
+void classify_dataset(DataSet set, FeatureSet featureset, double threshold)
+{
     uint16_t i;
 
     for ( i = 0; i < set.count; i++ ) {
@@ -8,15 +11,35 @@ void classify_dataset(DataSet set, FeatureSet featureset, double threshold) {
     }
 }
 
-int8_t classify(Headline *headline, FeatureSet featureset, double threshold) {
-    headline->feature_vector = _get_feature_vector(headline->content, featureset);
-    headline->prob_cb = _calculate_cb_prob(headline->feature_vector, featureset);
-    headline->classified_clickbait = threshold <= headline->prob_cb;
+
+
+
+int8_t classify(Headline *headline, FeatureSet featureset, double threshold)
+{
+    _score_headline(headline, featureset);
+
+    headline->classified_clickbait = threshold <= headline->prob_score;
 
     return headline->classified_clickbait;
 }
 
-double calculate_threshold(DataSet set, FeatureSet featureset) {
+
+
+
+void score_dataset(DataSet set, FeatureSet featureset)
+{
+    uint16_t i;
+
+    for ( i = 0; i < set.count; i++ ) {
+        _score_headline(set.data + i, featureset);
+    }
+}
+
+
+
+
+double calculate_threshold(DataSet set, FeatureSet featureset)
+{
     int i, count_cb = 0, count_ncb = 0;
     double threshold = 0.5, prob, *cb_probs, *ncb_probs;
 
@@ -43,7 +66,20 @@ double calculate_threshold(DataSet set, FeatureSet featureset) {
     return threshold;
 }
 
-uint8_t _get_feature_vector(char str_in[], FeatureSet featureset) {
+
+
+
+void _score_headline(Headline *headline, FeatureSet featureset)
+{
+    headline->feature_vector = _get_feature_vector(headline->content, featureset);
+    headline->prob_score = _calculate_cb_prob(headline->feature_vector, featureset);
+}
+
+
+
+
+uint8_t _get_feature_vector(char str_in[], FeatureSet featureset)
+{
     uint8_t i, feature_vector;
 
     for (i = 0; i < featureset.count; i++) {
@@ -54,7 +90,11 @@ uint8_t _get_feature_vector(char str_in[], FeatureSet featureset) {
     return feature_vector;
 }
 
-double _calculate_cb_prob(uint8_t feature_vector, FeatureSet featureset) {
+
+
+
+double _calculate_cb_prob(uint8_t feature_vector, FeatureSet featureset)
+{
     double prob = 1;
     int8_t i;
 
@@ -78,6 +118,10 @@ double _calculate_cb_prob(uint8_t feature_vector, FeatureSet featureset) {
     return prob;
 }
 
-double _prob_given_not_feature(double pcbf, double pf) {
+
+
+
+double _prob_given_not_feature(double pcbf, double pf)
+{
     return ( 0.5 - pcbf * pf ) / ( 1 - pf );
 }
