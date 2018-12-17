@@ -31,6 +31,7 @@ typedef struct Commands {
 
 Commands import_commands();
 
+int c_exit(const char **argv);
 int c_help(const char **argv);
 int c_train(const char **argv);
 int c_test(const char **argv);

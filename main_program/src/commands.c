@@ -5,8 +5,9 @@ Commands import_commands()
     int i = 0;
     Commands exported;
 
-    if ((exported.commands = (Command*) calloc(4, sizeof(Command))) == NULL) fatal_error();
+    if ((exported.commands = (Command*) calloc(5, sizeof(Command))) == NULL) fatal_error();
 
+    _export_command("exit", c_exit, i++, exported);
     _export_command("help", c_help, i++, exported);
     _export_command("train", c_train, i++, exported);
     _export_command("test", c_test, i++, exported);
@@ -20,37 +21,39 @@ Commands import_commands()
 
 
 
+int c_exit(const char **argv)
+{
+    return 0;
+}
+
+
+
+
 int c_help(const char **argv)
 {
     printf("\nCOMMANDS\n");
     _print_thick_line();
     printf(
-        "> train [path]\n"
-        "Train features on training dataset (path optional, if saved to config)\n"
+        "train [path]\tTrain features on training set (path optional, if in config)\n"
         "\n"
-        "Flags:\n"
-        "\t--print: print trained features\n"
+        "\tFlags:\t--print:       print trained features\n"
     );
     _print_thin_line();
     printf(
-        "> test [path]\n"
-        "Run evaluation on test dataset (path optional, if saved to config)\n"
+        "test [path]\tRun evaluation on test set (path optional, if in config)\n"
         "\n"
-        "Flags:\n"
-        "\t--print: print evaluation data\n"
-        "\t--save [path]: export CSV data\n"
+        "\tFlags:\t--print:       print evaluation data\n"
+        "\t      \t--save [path]: export CSV data\n"
     );
     _print_thin_line();
     printf(
-        "> threshold [number]\n"
-        "Get saved threshold, number only used if flags set\n"
+        "threshold [number]\tGet saved threshold, number only used if flags set\n"
         "\n"
-        "Subroutines:\n"
-        "\t-calc: calculate optimal threshold\n"
-        "Flags:\n"
-        "\t--from [dataset]: either test (default) or training\n"
-        "\t--print: print confusion matrix based on threshold\n"
-        "\t--save: save threshold to config\n"
+        "\tSubr.:\t-calc:            calculate optimal threshold\n"
+        "\n"
+        "\tFlags:\t--from [dataset]: either 'test' (default) or 'training'\n"
+        "\t      \t--print:          print confusion matrix based on threshold\n"
+        "\t      \t--save:           save threshold to config\n"
     );
     _print_thick_line();
 
@@ -163,7 +166,7 @@ int c_threshold(const char **argv)
         return 0;
     }
     
-    if (_flag_set(argv, "--save") != -1)
+    if (_flag_set(argv, "-calc") == -1 || _flag_set(argv, "--save") != -1)
         printf("Threshold is set to: %f\n", threshold);
 
     if (_flag_set(argv, "--print") != -1) {
@@ -193,7 +196,7 @@ int _load_dataset(const char **argv, DataSet *dataset, int force_training)
     int i;
     char filename[MAX_FN_LEN];
 
-    if (force_training == 1 || ((i = _flag_set(argv, "-from")) != -1 && strcmp(argv[i+1], "training") == 0))
+    if (force_training == 1 || ((i = _flag_set(argv, "--from")) != -1 && strcmp(argv[i+1], "training") == 0))
         strcpy(filename, load_config("TRAINING_DATASET_PATH"));
     else
         strcpy(filename, load_config("TEST_DATASET_PATH"));
@@ -264,7 +267,7 @@ double _get_threshold(const char **argv, int i)
         return -1;
     }
 
-    if (_flag_set(argv, "--save") != -1)
+    if (_flag_set(argv, "--save") != -1 || _flag_set(argv, "--print") == -1)
         save_config("THRESHOLD", threshold_str);
 
     sscanf(threshold_str, "%lf", &threshold);
