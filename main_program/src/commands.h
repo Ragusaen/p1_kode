@@ -37,6 +37,7 @@ int c_help(const char **argv);
 int c_train(const char **argv);
 int c_test(const char **argv);
 int c_threshold(const char **argv);
+int c_classify(const char **argv);
 
 
 int _load_dataset_from_arg(const char **argv, DataSet *dataset, char *config_key);
@@ -49,13 +50,11 @@ double _get_threshold(const char **argv, int i);
 
 void _print_trained_features(FeatureSet featureset);
 void _print_feature(Feature feature);
-
 void _print_evaluation(EvaluationSet evaluation);
 void _print_confusion_matrix(ConfusionMatrix cm);
-
 void _print_key_values_header();
 void _print_key_values(ConfusionMatrix cm);
-
+void _print_headline_features(uint8_t feature_vector, int count);
 void _print_thin_line();
 void _print_thick_line();
 

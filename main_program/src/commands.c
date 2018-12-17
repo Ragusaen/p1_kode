@@ -9,13 +9,14 @@ Commands import_commands()
     int i = 0;
     Commands exported;
 
-    if ((exported.commands = (Command*) calloc(5, sizeof(Command))) == NULL) fatal_error();
+    if ((exported.commands = (Command*) calloc(6, sizeof(Command))) == NULL) fatal_error();
 
     _export_command("exit", c_exit, i++, exported);
     _export_command("help", c_help, i++, exported);
     _export_command("train", c_train, i++, exported);
     _export_command("test", c_test, i++, exported);
     _export_command("threshold", c_threshold, i++, exported);
+    _export_command("classify", c_classify, i++, exported);
 
     exported.count = i;
 
@@ -72,6 +73,12 @@ int c_help(const char **argv)
         "\t      \t--print:          print confusion matrix based on threshold\n"
         "\t      \t--save:           save threshold to config\n"
     );
+    _print_thin_line();
+    printf(
+        "classify \"text\" [--threshold N]\tClassify a single headline (text)\n"
+        "\n"
+        "\tFlags:\t--threshold N:    set new threshold (N)\n"
+    );
     _print_thick_line();
 
     return 1;
@@ -94,7 +101,7 @@ int c_train(const char **argv)
 
     /* load dataset */
     if (!_load_dataset_from_arg(argv, &training_set, "TRAINING_DATASET_PATH"))
-        return 0;
+        return 1;
 
     /* train the features - calculates p(CB|F) and p(F) */
     trained_features = train_features(training_set);
@@ -126,12 +133,12 @@ int c_test(const char **argv)
 
     /* load dataset */
     if (!_load_dataset_from_arg(argv, &test_set, "TEST_DATASET_PATH"))
-        return 0;
+        return 1;
 
     /* load trained features */
     if (!load_trained_features(&trained_features)) {
         error("Features not trained");
-        return 0;
+        return 1;
     }
 
     /* score the dataset */
@@ -177,7 +184,7 @@ int c_threshold(const char **argv)
     /* only load test dataset and trained features if necessary */
     if ((_flag_set(argv, "-calc") != -1 || _flag_set(argv, "--print") != -1) &&
         (!_load_dataset(argv, &dataset, 0) || !load_trained_features(&trained_features)))
-        return 0;
+        return 1;
 
     if (_flag_set(argv, "-calc") != -1) {
         /* calculate optimal threshold */
@@ -196,7 +203,7 @@ int c_threshold(const char **argv)
     }
     /* get threshold from argv or config */
     else if ((threshold = _get_threshold(argv, 2)) == -1)
-        return 0;
+        return 1;
 
     if (_flag_set(argv, "--print") != -1) {
         /* classify the dataset */
@@ -206,6 +213,40 @@ int c_threshold(const char **argv)
         /* output confusion matrix to screen */
         _print_confusion_matrix(cm);
     }
+
+    return 1;
+}
+
+
+/**
+ * Classify a single headline. Doesn't work in CLI-loop.
+ * 
+ * Command:     classify "[Text content of headline]" [--threshold N]
+ * 
+ * --threshold  set new threshold (N)
+ */
+
+int c_classify(const char **argv)
+{
+    int cls, i;
+    double threshold;
+    FeatureSet trained_features;
+    Headline headline;
+
+    i = _flag_set(argv, "--threshold");
+
+    if (!_is_value(argv[2]) ||
+        !load_trained_features(&trained_features) ||
+        (threshold = _get_threshold(argv, i != -1 ? (i+1) : -1)) == -1)
+        return 1;
+
+    if ((headline.content = (char*) malloc(strlen(argv[2]) + 1)) == NULL ) fatal_error();
+
+    strcpy(headline.content, argv[2]);
+
+    cls = classify(&headline, trained_features, threshold);
+
+    printf("Score: %f\tClickbait?  %s\n", headline.prob_score, cls ? "YES" : "NO");
 
     return 1;
 }
@@ -449,6 +490,15 @@ void _print_key_values(ConfusionMatrix cm)
     printf("%-12.6f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f\n",
         cm.threshold, cm.ACC, cm.PPV, cm.TPR, cm.FPR, cm.F1, cm.MCC
     );
+}
+
+void _print_headline_features(uint8_t feature_vector, int count) {
+    int i;
+
+    for (i = count - 1; i >= 0; i--) {
+        printf("%u", feature_vector % 2 == 1 ? 1 : 0);
+        feature_vector >>= 1;
+    }
 }
 
 void _print_thin_line()

@@ -79,8 +79,8 @@ int _cli_run_command(const char *command, const char **argv, Commands cmdset)
 
 char** _parse_argv(char *line)
 {
-    int buffer_size = CLI_ARG_SIZE, i = 1;
-    char **argv, *token;
+    int buffer_size = CLI_ARG_SIZE, i = 1, in_string = 0;
+    char **argv, *token, temp[CLI_BUFFER_SIZE];
 
     if ((argv = malloc(buffer_size * sizeof(char*))) == NULL) fatal_error();
 
@@ -90,7 +90,21 @@ char** _parse_argv(char *line)
     token = strtok(line, CLI_DELIMITER);
 
     while (token != NULL) {
-        argv[i++] = token;
+        if (in_string) {
+            memset(temp, '\0', CLI_BUFFER_SIZE);
+            temp[0] = ' ';
+            strncpy(temp + 1, token, strlen(token));
+            
+            if (temp[strlen(temp)-1] == '"') {
+                in_string = 0;
+                temp[strlen(temp)-1] = '\0';
+            }
+
+            strcat(argv[i-1], temp);
+        }
+        else {
+            argv[i++] = (in_string = token[0] == '"') ? token + 1 : token;
+        }
 
         if (i >= buffer_size) {
             /* dynamically increase argv size */
