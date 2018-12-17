@@ -36,7 +36,7 @@ typedef struct FeatureSet {
 } FeatureSet;
 
 FeatureSet import_features();
-void _add_feature(char str[], uint8_t (*func)(char*), uint8_t i, FeatureSet features);
+void _export_feature(char name[], uint8_t (*func)(char*), uint8_t i, FeatureSet exported);
 
 uint8_t f_no_long_word(char str_in[]);
 uint8_t f_low_average_word_length(char str_in[]);
