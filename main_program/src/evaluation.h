@@ -30,7 +30,7 @@ ConfusionMatrix evaluate_classification(DataSet dataset, double threshold);
 
 double calculate_AUC(EvaluationSet set);
 
-void write_evaluation_file(EvaluationSet set, char *filename);
+void write_evaluation_file(EvaluationSet set, const char *filename);
 
 ResultCounter _count_thresholds_positives_negatives(DataSet dataset);
 ResultCounter _count_true_false_positives(DataSet dataset);

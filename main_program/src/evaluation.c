@@ -7,7 +7,7 @@
  */
 
 EvaluationSet evaluate_classifier(DataSet dataset) {
-    int i, output_i;
+    int i, output_i = 0;
     double threshold = 1;
     EvaluationSet set;
     ResultCounter c;
@@ -24,11 +24,11 @@ EvaluationSet evaluate_classifier(DataSet dataset) {
     
     for (i = 0; i < dataset.count; i++) {
         /* if the probability is not equal to current threshold */
-        if (dataset.data[i].prob_cb != threshold) {
+        if (dataset.data[i].prob_score != threshold) {
             /* add ConfusionMatrix with current counts to EvaluationSet */
             set.data[output_i++] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
             /* set new threshold */
-            threshold = dataset.data[i].prob_cb;
+            threshold = dataset.data[i].prob_score;
         }
 
         /* count item as either TP or FP */
@@ -49,7 +49,8 @@ EvaluationSet evaluate_classifier(DataSet dataset) {
  * @param threshold     will be passed to the ConfusionMatrix
  */
 
-ConfusionMatrix evaluate_classification(DataSet dataset, double threshold) {
+ConfusionMatrix evaluate_classification(DataSet dataset, double threshold)
+{
     ResultCounter result;
     ConfusionMatrix cm;
 
@@ -69,7 +70,8 @@ ConfusionMatrix evaluate_classification(DataSet dataset, double threshold) {
  * @param set   an EvaluationSet which contains an array of Confusion Matrixes.
  */
 
-double calculate_AUC(EvaluationSet set) {
+double calculate_AUC(EvaluationSet set)
+{
     int i;
     double auc = 0.0, x_1, y_1, x_2, y_2;
 
@@ -101,7 +103,8 @@ double calculate_AUC(EvaluationSet set) {
  * @param filename  the path and filename for the CSV file
  */
 
-void write_evaluation_file(EvaluationSet set, char *filename) {
+void write_evaluation_file(EvaluationSet set, const char *filename)
+{
     int i;
     FILE *fp;
 
@@ -125,7 +128,8 @@ void write_evaluation_file(EvaluationSet set, char *filename) {
  * Counts the number of thresholds (unique probabilities), positives, and negatives
  */
 
-ResultCounter _count_thresholds_positives_negatives(DataSet dataset) {
+ResultCounter _count_thresholds_positives_negatives(DataSet dataset)
+{
     int i;
     double threshold = 1;
     ResultCounter c;
@@ -135,8 +139,8 @@ ResultCounter _count_thresholds_positives_negatives(DataSet dataset) {
 
     for (i = 0; i < dataset.count; i++) {
         /* count unique probabilities (thresholds) */
-        if (dataset.data[i].prob_cb != threshold) {
-            threshold = dataset.data[i].prob_cb;
+        if (dataset.data[i].prob_score != threshold) {
+            threshold = dataset.data[i].prob_score;
             c.thresholds++;
         }
         
@@ -153,7 +157,8 @@ ResultCounter _count_thresholds_positives_negatives(DataSet dataset) {
  * Requires a classified dataset.
  */
 
-ResultCounter _count_true_false_positives(DataSet dataset) {
+ResultCounter _count_true_false_positives(DataSet dataset)
+{
     int i;
     uint8_t cls, lbl;
     ResultCounter c;
@@ -189,7 +194,8 @@ ResultCounter _count_true_false_positives(DataSet dataset) {
  * @threshold   the threshold used
  */
 
-ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold) {
+ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold)
+{
     double mcc_denom;
     ConfusionMatrix cm;
 
@@ -255,11 +261,12 @@ ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double thre
  * Sorts headlines by probability in descending order.
  */
 
-int _sort_by_probability_desc(const void *pa, const void *pb) {
+int _sort_by_probability_desc(const void *pa, const void *pb)
+{
     Headline a = *(Headline*)pa, b = *(Headline*)pb;
 
-    if (a.prob_cb < b.prob_cb) return 1;
-    else if (a.prob_cb > b.prob_cb) return -1;
+    if (a.prob_score < b.prob_score) return 1;
+    else if (a.prob_score > b.prob_score) return -1;
     else return 0;
 }
 
@@ -268,7 +275,8 @@ int _sort_by_probability_desc(const void *pa, const void *pb) {
  * Writes a ConfusionMatrix to a CSV file.
  */
 
-void _write_evaluation_data(FILE *fp, ConfusionMatrix data) {
+void _write_evaluation_data(FILE *fp, ConfusionMatrix data)
+{
     fprintf(fp, "%s;%d;%d;%d;%d;%s;%s;%s;%s;%s;%s\n",
         _csv_double(data.threshold),
         data.TP, data.FP, data.FN, data.TN,
@@ -286,7 +294,8 @@ void _write_evaluation_data(FILE *fp, ConfusionMatrix data) {
  * Converts a double to a string with ',' as the decimal separator.
  */
 
-char* _csv_double(double n) {
+char* _csv_double(double n)
+{
     char *str, *token;
     
     if ((str = malloc(16)) == NULL) fatal_error();
