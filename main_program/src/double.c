@@ -1,6 +1,11 @@
-#include "double_array.h"
+#include "double.h"
 
-DoubleArrayCalc double_array_calc(double arr[], int n) {
+/**
+ * Calculate all statistics from double array
+ */
+
+DoubleArrayCalc double_array_calc(double arr[], int n)
+{
     DoubleArrayCalc calc;
 
     double_array_sort(arr, n);
@@ -16,11 +21,23 @@ DoubleArrayCalc double_array_calc(double arr[], int n) {
     return calc;
 }
 
-void double_array_sort(double arr[], int n) {
+
+/**
+ * Sort array ascending
+ */
+
+void double_array_sort(double arr[], int n)
+{
     qsort(arr, n, sizeof(double), _compare_doubles);
 }
 
-double double_array_sum(double arr[], int n) {
+
+/**
+ * Calculate sum
+ */
+
+double double_array_sum(double arr[], int n)
+{
     int i;
     double sum = 0;
 
@@ -30,19 +47,43 @@ double double_array_sum(double arr[], int n) {
     return sum;
 }
 
-double double_array_avg(double arr[], int n) {
+
+/**
+ * Calculate average
+ */
+
+double double_array_avg(double arr[], int n)
+{
     return double_array_sum(arr, n) / n;
 }
 
-double double_array_min(double arr[]) {
+
+/**
+ * Find minimum
+ */
+
+double double_array_min(double arr[])
+{
     return arr[0];
 }
 
-double double_array_max(double arr[], int n) {
+
+/**
+ * Find maximum
+ */
+
+double double_array_max(double arr[], int n)
+{
     return arr[n - 1];
 }
 
-double double_array_median(double arr[], int n) {
+
+/**
+ * Calculate median
+ */
+
+double double_array_median(double arr[], int n)
+{
     double median = 0;
 
     if (n % 2 == 0)
@@ -53,7 +94,13 @@ double double_array_median(double arr[], int n) {
     return median;
 }
 
-double double_array_lower(double arr[], int n) {
+
+/**
+ * Calculate lower quartile
+ */
+
+double double_array_lower(double arr[], int n)
+{
     double lower = 0;
 
     if (n % 4 == 0)
@@ -64,7 +111,13 @@ double double_array_lower(double arr[], int n) {
     return lower;
 }
 
-double double_array_upper(double arr[], int n) {
+
+/**
+ * Calculate upper quartile
+ */
+
+double double_array_upper(double arr[], int n)
+{
     double lower = 0;
 
     if (n % 4 == 0)
@@ -75,7 +128,13 @@ double double_array_upper(double arr[], int n) {
     return lower;
 }
 
-int _compare_doubles(const void *a, const void *b) {
+
+/**
+ * Compare doubles, sort ascending
+ */
+
+int _compare_doubles(const void *a, const void *b)
+{
     if (*(double*)a > *(double*)b) return 1;
     else if (*(double*)a < *(double*)b) return -1;
     else return 0;

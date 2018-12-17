@@ -1,113 +1,233 @@
 #include "evaluation.h"
 
-double recall(Headline *data_in, int data_amount) {
-    int i,
-        clickbait_tp = 0,
-        clickbait_lp = 0;
+/**
+ * Evaluates the classifier at all thresholds, outputs an EvaluationSet with an array of Confusion Matrixes.
+ * 
+ * @param dataset   a dataset with calculated probabilities
+ */
 
-    for (i = 0; i < data_amount; i++){
-        /* count all headlines labeled as clickbait */
-        if ( data_in[i].labeled_clickbait ) {
-            clickbait_lp++;
+EvaluationSet evaluate_classifier(DataSet dataset) {
+    int i, output_i = 0;
+    double threshold = 1;
+    EvaluationSet set;
+    ResultCounter c;
 
-            /* count all the true positives */
-            if ( data_in[i].classified_clickbait )
-                clickbait_tp++;
+    /* sort the dataset from highest to lowest probability */
+    qsort(dataset.data, dataset.count, sizeof(Headline), _sort_by_probability_desc);
+
+    /* count the number of thresholds (unique probabilities), positives, and negatives */
+    c = _count_thresholds_positives_negatives(dataset);
+    
+    /* initialize the EvaluationSet */
+    set.count = c.thresholds;
+    if ((set.data = (ConfusionMatrix*) calloc(set.count, sizeof(ConfusionMatrix))) == NULL) fatal_error();
+    
+    for (i = 0; i < dataset.count; i++) {
+        /* if the probability is not equal to current threshold */
+        if (dataset.data[i].prob_score != threshold) {
+            /* add ConfusionMatrix with current counts to EvaluationSet */
+            set.data[output_i++] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
+            /* set new threshold */
+            threshold = dataset.data[i].prob_score;
         }
+
+        /* count item as either TP or FP */
+        if (dataset.data[i].labeled_clickbait) c.TP++; else c.FP++;
     }
 
-    return (double) clickbait_tp / clickbait_lp;
+    /* add the last ConfusionMatrix with the final count */
+    set.data[output_i] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
+
+    return set;
 }
 
-double precision(Headline *data_in, int data_amount) {
-    int i,
-        clickbait_cp = 0,
-        clickbait_tp = 0;
 
-    for (i = 0; i < data_amount; i++) {
-        /* count all the positives */
-        if ( data_in[i].classified_clickbait ) {
-            clickbait_cp++;
+/**
+ * Evaluates a specific classification.
+ * 
+ * @param dataset       a classified dataset
+ * @param threshold     will be passed to the ConfusionMatrix
+ */
 
-            /* count all the true positives */
-            if ( data_in[i].labeled_clickbait )
-                clickbait_tp++;
-        }
-    }
+ConfusionMatrix evaluate_classification(DataSet dataset, double threshold)
+{
+    ResultCounter result;
+    ConfusionMatrix cm;
 
-    return (double) clickbait_tp / clickbait_cp;
+    /* count all positives, negatives, and all true and false positives */
+    result = _count_true_false_positives(dataset);
+    
+    /* create Confusion Matrix */
+    cm = _calc_confusion_matrix(result.P, result.N, result.TP, result.FP, threshold);
+
+    return cm;
 }
 
-double f_measure(Headline *data_in, int data_amount){
-   
-    double beta = 1;
-    double precision_ = precision(data_in, data_amount);
-    double recall_ = recall(data_in, data_amount);
 
-    return (1 + beta * beta) * precision_ * recall_ / ((beta * precision_) * recall_);
-}
+/**
+ * Calculates the area under the ROC curve.
+ * 
+ * @param set   an EvaluationSet which contains an array of Confusion Matrixes.
+ */
 
-ROC_point *calculate_ROC(Headline *headlines, int count) {
-
-    ROC_point *data_points = (ROC_point*)malloc( ROC_POINTS * sizeof(ROC_point) );
-    if ( data_points == NULL ) {
-        printf("Error allocating memory: data_points");
-        exit(EXIT_FAILURE);
-    }
-
-    return data_points;
-}
-
-ConfusionMatrix calc_confusion_matrix(Headline *data_in, int data_amount) {
+double calculate_AUC(EvaluationSet set)
+{
     int i;
-    uint8_t c, l;
+    double auc = 0.0, x_1, y_1, x_2, y_2;
+
+    /* set first point */
+    x_1 = set.data[0].FPR;
+    y_1 = set.data[0].TPR;
+
+    for (i = 1; i < set.count; i++) {
+        /* set second point */
+        x_2 = set.data[i].FPR;
+        y_2 = set.data[i].TPR;
+
+        /* add area under points to sum */
+        auc += 0.5 * (x_2 - x_1) * (y_2 + y_1);
+
+        /* set first point to second points coordinates */
+        x_1 = x_2;
+        y_1 = y_2;
+    }
+
+    return auc;
+}
+
+
+/**
+ * Exports the EvaluationSet to a CSV file.
+ * 
+ * @param set       an EvaluationSet created by evaluate_classifier
+ * @param filename  the path and filename for the CSV file
+ */
+
+void write_evaluation_file(EvaluationSet set, const char *filename)
+{
+    int i;
+    FILE *fp;
+
+    if((fp = fopen(filename, "w")) == NULL) fatal("Couldn't write to evaluation file");
+
+    /* write header row */
+    fprintf(fp, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
+        "Threshold", "TP", "FP", "FN", "TN", "Accuracy", "Precision", "Recall", "Fall-out", "F1 score", "MCC"
+    );
+
+    /* write data */
+    for (i = 0; i < set.count; i++) {
+        _write_evaluation_data(fp, set.data[i]);
+    }
+
+    fclose(fp);
+}
+
+
+/**
+ * Counts the number of thresholds (unique probabilities), positives, and negatives
+ */
+
+ResultCounter _count_thresholds_positives_negatives(DataSet dataset)
+{
+    int i;
+    double threshold = 1;
+    ResultCounter c;
+
+    /* reset counts */
+    c.P = 0; c.N = 0; c.TP = 0; c.FP = 0; c.thresholds = 1;
+
+    for (i = 0; i < dataset.count; i++) {
+        /* count unique probabilities (thresholds) */
+        if (dataset.data[i].prob_score != threshold) {
+            threshold = dataset.data[i].prob_score;
+            c.thresholds++;
+        }
+        
+        /* count item as either positive or negative */
+        if (dataset.data[i].labeled_clickbait) c.P++; else c.N++;
+    }
+
+    return c;
+}
+
+
+/**
+ * Counts all positives, negatives, and all true and false positives.
+ * Requires a classified dataset.
+ */
+
+ResultCounter _count_true_false_positives(DataSet dataset)
+{
+    int i;
+    uint8_t cls, lbl;
+    ResultCounter c;
+
+    /* reset counters */
+    c.P = 0; c.N = 0; c.TP = 0; c.FP = 0;
+
+    for (i = 0; i < dataset.count; i++) {
+        lbl = dataset.data[i].labeled_clickbait;
+        cls = dataset.data[i].classified_clickbait;
+
+        if (lbl == 1) {
+            c.P++;
+            if (cls == 1) c.TP++;
+        }
+        else {
+            c.N++;
+            if (cls == 1) c.FP++;
+        }
+    }
+
+    return c;
+}
+
+
+/**
+ * Calculates and returns a Confusion Matrix.
+ * 
+ * @param P     number of positives
+ * @param N     number of negatives
+ * @param TP    number of true positives
+ * @param FP    number of false positives
+ * @threshold   the threshold used
+ */
+
+ConfusionMatrix _calc_confusion_matrix(int P, int N, int TP, int FP, double threshold)
+{
     double mcc_denom;
     ConfusionMatrix cm;
 
-    /* reset counters */
-    cm.P = 0; cm.N = 0; cm.TP = 0; cm.FP = 0; cm.FN = 0; cm.TN = 0;
+    cm.threshold = threshold;
+    
+    cm.P = P; cm.N = N; cm.TP = TP; cm.FP = FP;
 
-    for (i = 0; i < data_amount; i++) {
-        l = data_in[i].labeled_clickbait;
-        c = data_in[i].classified_clickbait;
-
-        if ( l == 1 ) {
-            cm.P++;
-            if ( c == 1 ) cm.TP++; else cm.FN++;
-        }
-        else {
-            cm.N++;
-            if ( c == 1 ) cm.FP++; else cm.TN++;
-        }
-    }
-
-    /* total population */
-    cm.total = data_amount;
+    cm.FN = cm.P - cm.TP;   /* false negatives */
+    cm.TN = cm.N - cm.FP;   /* true negatives */
+    cm.PP = cm.TP + cm.FP;  /* predicted condition positive */
+    cm.PN = cm.FN + cm.TN;  /* predicted condition negative */
+    cm.total = cm.P + cm.N; /* total population */
 
     /* prevalence, prior */
     cm.prior = (double) cm.P / cm.total;
 
-    /* predicted condition positive */
-    cm.PP = cm.TP + cm.FP;
-    /* predicted condition negative */
-    cm.PN = cm.FN + cm.TN;
-
     /* sensitivity, recall, hit rate, or true positive rate (TPR) */
     cm.TPR = (double) cm.TP / cm.P;
-    /* specificity, selectivity or true negative rate (TNR) */
-    cm.TNR = (double) cm.TN / cm.N;
-    /* precision or positive predictive value (PPV) */
-    cm.PPV = (double) cm.TP / cm.PP;
-    /* negative predictive value (NPV) */
-    cm.NPV = (double) cm.TN / cm.PN;
-    /* miss rate or false negative rate (FNR) */
-    cm.FNR = (double) cm.FN / cm.P;
     /* fall-out or false positive rate (FPR) */
     cm.FPR = (double) cm.FP / cm.N;
+    /* miss rate or false negative rate (FNR) */
+    cm.FNR = 1 - cm.TPR;
+    /* specificity, selectivity or true negative rate (TNR) */
+    cm.TNR = 1 - cm.FPR;
+    /* precision or positive predictive value (PPV) */
+    cm.PPV = cm.PP != 0 ? (double) cm.TP / cm.PP : 0;
+    /* negative predictive value (NPV) */
+    cm.NPV = cm.PN != 0 ? (double) cm.TN / cm.PN : 0;
     /* false discovery rate (FDR) */
-    cm.FDR = (double) cm.FP / (cm.FP + cm.TP);
+    cm.FDR = 1 - cm.PPV;
     /* false omission rate (FOR) */
-    cm.FOR = (double) cm.FN / (cm.FN + cm.TN);
+    cm.FOR = 1 - cm.NPV;
 
     /* accuracy (ACC) */
     cm.ACC = (double) (cm.TP + cm.TN) / cm.total;
@@ -121,13 +241,71 @@ ConfusionMatrix calc_confusion_matrix(Headline *data_in, int data_amount) {
 
     /* F1 score */
     cm.F1 = 2 / (1 / cm.TPR + 1 / cm.PPV);
+
     /* Matthews correlation coefficient (MCC) */
+    /* (TP * TN - FP * FN) / sqrt(PP * P * N * PN) */
     mcc_denom = (double) sqrt(cm.PP * cm.P * cm.N * cm.PN);
     cm.MCC = (double) (cm.TP * cm.TN - cm.FP * cm.FN) / (mcc_denom != 0 ? mcc_denom : 1);
+
     /* Informedness or Bookmaker Informedness (BM) */
     cm.BM = cm.TPR + cm.TNR - 1;
     /* Markedness (MK) */
     cm.MK = cm.PPV + cm.NPV - 1;
 
     return cm;
+}
+
+
+/**
+ * A comparison function for use with qsort.
+ * Sorts headlines by probability in descending order.
+ */
+
+int _sort_by_probability_desc(const void *pa, const void *pb)
+{
+    Headline a = *(Headline*)pa, b = *(Headline*)pb;
+
+    if (a.prob_score < b.prob_score) return 1;
+    else if (a.prob_score > b.prob_score) return -1;
+    else return 0;
+}
+
+
+/**
+ * Writes a ConfusionMatrix to a CSV file.
+ */
+
+void _write_evaluation_data(FILE *fp, ConfusionMatrix data)
+{
+    fprintf(fp, "%s;%d;%d;%d;%d;%s;%s;%s;%s;%s;%s\n",
+        _csv_double(data.threshold),
+        data.TP, data.FP, data.FN, data.TN,
+        _csv_double(data.ACC),
+        _csv_double(data.PPV),
+        _csv_double(data.TPR),
+        _csv_double(data.FPR),
+        _csv_double(data.F1),
+        _csv_double(data.MCC)
+    );
+}
+
+
+/**
+ * Converts a double to a string with ',' as the decimal separator.
+ */
+
+char* _csv_double(double n)
+{
+    char *str, *token;
+    
+    if ((str = malloc(16)) == NULL) fatal_error();
+
+    /* convert double to string */
+    sprintf(str, "%.6f", n);
+
+    /* replace the decimal separator */
+    token = strchr(str, '.');
+    token[0] = ',';
+
+    return str;
 }

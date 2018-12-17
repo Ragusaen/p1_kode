@@ -1,186 +1,164 @@
 #include "classifier.h"
 
-void classify_array( Headline *headlines, uint16_t headline_count, Feature *features, double threshold ) {
+/**
+ * Classify a dataset.
+ * 
+ * @param dataset       the dataset to classify
+ * @param featureset    a trained set of features
+ * @param threshold     the threshold to classify by
+ */
+
+void classify_dataset(DataSet dataset, FeatureSet featureset, double threshold)
+{
     uint16_t i;
-    for ( i = 0; i < headline_count; i++ ) {
-        classify( headlines + i, features, threshold );
+
+    for ( i = 0; i < dataset.count; i++ ) {
+        classify(dataset.data + i, featureset, threshold);
     }
 }
 
-int8_t classify( Headline *headline, Feature *features, double threshold ) {
-    int8_t class_;
 
-    _set_feature_vector(headline, features);
+/**
+ * Classify a headline item.
+ * 
+ * @param headline      a pointer to the headline item
+ * @param featureset    a trained set of features
+ * @param threshold     the threshold to classify by
+ */
 
-    class_ = _calculate_cb_prob(*headline, features) >= threshold ? 1 : 0;
-    /*class_ = _bernoulli_nb(*headline, features);*/
+int8_t classify(Headline *headline, FeatureSet featureset, double threshold)
+{
+    /* set probability score */
+    _score_headline(headline, featureset);
 
-    headline->classified_clickbait = class_;
+    /* classify headline */
+    headline->classified_clickbait = threshold <= headline->prob_score ? 1 : 0;
 
     return headline->classified_clickbait;
 }
 
-Feature* calculate_feature_array( Headline* headlines, uint16_t headline_count ) {
+
+/**
+ * Add probability scores to a dataset.
+ * 
+ * @param dataset       the dataset to score
+ * @param featureset    a trained set of features
+ */
+
+void score_dataset(DataSet dataset, FeatureSet featureset)
+{
     uint16_t i;
 
-    Feature *features = (Feature*)calloc(FEATURE_COUNT, sizeof(Feature));
-    if ( features == NULL )
-        exit(EXIT_FAILURE);
-
-    features[0].has_feature = &has_no_long_word;
-    features[1].has_feature = &has_special_words;
-    features[2].has_feature = &is_short;
-    features[3].has_feature = &has_special_punctuation;
-    features[4].has_feature = &has_pronouns;
-    features[5].has_feature = &has_number;
-    features[6].has_feature = &has_low_average_word_length;
-    features[7].has_feature = &has_stop_words;
-
-    for ( i = 0; i < headline_count; i++ ) {
-        _add_feature_count( headlines[i], features );
+    for ( i = 0; i < dataset.count; i++ ) {
+        _score_headline(dataset.data + i, featureset);
     }
-
-    for ( i = 0; i < FEATURE_COUNT; i++ ) {
-        /* p(F) = |F|/|A| */
-        features[i].prob_feature = (double)features[i].feature_count / headline_count;
-
-        if (features[i].feature_count > 0) {
-            /* p(CB|F) = |CB & F| / |F| */
-            features[i].prob_cb_given_feature = (double)features[i].feature_cb_count / features[i].feature_count;
-        }
-        else {
-            features[i].prob_cb_given_feature = 0.5;
-        }
-    }
-
-    return features;
 }
 
-double calculate_threshold(Headline* headlines, uint16_t headline_count, Feature *features) {
+
+/**
+ * Calculates an optimal threshold, the average of the two median scores of clickbait and non-clickbait.
+ * 
+ * @param dataset       the dataset to use for probability scores
+ * @param featureset    a trained set of features
+ */
+
+double calculate_threshold(DataSet dataset, FeatureSet featureset)
+{
     int i, count_cb = 0, count_ncb = 0;
-    double threshold = 0.5, prob, *cb_probs, *ncb_probs;
-    DoubleArrayCalc cb_calc, ncb_calc;
+    double threshold = 0.5, prob_score, *cb_probs, *ncb_probs;
 
-    cb_probs = malloc(headline_count * 0.5 * sizeof(double));
-    ncb_probs = malloc(headline_count * 0.5 * sizeof(double));
+    /* two arrays of doubles, half size of dataset (50-50 distribution required) */
+    if ((cb_probs = malloc(dataset.count * 0.5 * sizeof(double))) == NULL ||
+        (ncb_probs = malloc(dataset.count * 0.5 * sizeof(double))) == NULL) fatal_error();
 
-    if (cb_probs == NULL || ncb_probs == NULL)
-        exit(EXIT_FAILURE);
+    for (i = 0; i < dataset.count; i++) {
+        /* get probability score */
+        prob_score = _calculate_prob_score(
+            _get_feature_vector(dataset.data[i].content, featureset),
+            featureset
+        );
 
-    for (i = 0; i < headline_count; i++) {
-        _set_feature_vector(&headlines[i], features);
-
-        prob = _calculate_cb_prob(headlines[i], features);
-
-        if (headlines[i].labeled_clickbait)
-            cb_probs[count_cb++] = prob;
+        /* add probability to either clickbait or non-clickbait array */
+        if (dataset.data[i].labeled_clickbait)
+            cb_probs[count_cb++] = prob_score;
         else
-            ncb_probs[count_ncb++] = prob;
+            ncb_probs[count_ncb++] = prob_score;
     }
 
-    ncb_calc = double_array_calc(ncb_probs, count_ncb);
-    cb_calc = double_array_calc(cb_probs, count_cb);
-
-    printf("TRAINING PROBABILITY SCORES\n");
-    printf("%-15s%-12s%-12s%-12s%-12s%-12s%-12s%-12s\n",
-        "", "Sum", "Average", "Minimum", "Lower", "Median", "Upper", "Maximum"
-    );
-    printf("%-15s%-12f%-12f%-12f%-12f%-12f%-12f%-12f\n",
-        "NON-CLICKBAIT",
-        ncb_calc.sum, ncb_calc.avg, ncb_calc.min, ncb_calc.lower, ncb_calc.median, ncb_calc.upper, ncb_calc.max
-    );
-    printf("%-15s%-12f%-12f%-12f%-12f%-12f%-12f%-12f\n",
-        "CLICKBAIT",
-        cb_calc.sum, cb_calc.avg, cb_calc.min, cb_calc.lower, cb_calc.median, cb_calc.upper, cb_calc.max
-    );
+    /* sort both arrays (required by double_array_median) */
+    double_array_sort(ncb_probs, count_ncb);
+    double_array_sort(cb_probs, count_cb);
 
     /* set threshold to the median average */
-    threshold = (ncb_calc.median + cb_calc.median) / 2;
+    threshold = (double_array_median(ncb_probs, count_ncb) + double_array_median(cb_probs, count_cb)) / 2;
 
     return threshold;
 }
 
-void _set_feature_vector( Headline *headline, Feature *features ) {
-    uint8_t i = 0;
-    for ( i = 0; i < FEATURE_COUNT; i++ ) {
-        headline->feature_vector <<= 1;
-        headline->feature_vector += features[i].has_feature(headline->title);
-    }
+
+/**
+ * Set feature vector and probability score on headline.
+ */
+
+void _score_headline(Headline *headline, FeatureSet featureset)
+{
+    headline->feature_vector = _get_feature_vector(headline->content, featureset);
+    headline->prob_score = _calculate_prob_score(headline->feature_vector, featureset);
 }
 
-void _add_feature_count( Headline headline, Feature *features ) {
-    uint8_t j;
-    for ( j = 0; j < FEATURE_COUNT; j++ ) {
-        if ( features[j].has_feature(headline.title) ) {
-            features[j].feature_count++;
 
-            if ( headline.labeled_clickbait ) {
-                features[j].feature_cb_count++;
-            }
-        }
+/**
+ * Create a feature vector based on the features detected in str.
+ */
+
+uint8_t _get_feature_vector(char str_in[], FeatureSet featureset)
+{
+    uint8_t i, feature_vector;
+
+    for (i = 0; i < featureset.count; i++) {
+        feature_vector <<= 1;
+        feature_vector += featureset.features[i].has_feature(str_in);
     }
+
+    return feature_vector;
 }
 
-double _calculate_cb_prob( Headline headline, Feature *features ) {
-    double prob = 0.5;
+
+/**
+ * Calculate probability score from a feature vector.
+ */
+
+double _calculate_prob_score(uint8_t feature_vector, FeatureSet featureset)
+{
+    double prob = 1;
     int8_t i;
 
-    for ( i = FEATURE_COUNT - 1; i >= 0; i-- ) {
-        double pcbf = features[i].prob_cb_given_feature;
-        double pf = features[i].prob_feature;
+    for (i = featureset.count - 1; i >= 0; i--) {
+        double pcbf = featureset.features[i].prob_cb_given_feature;
+        double pf = featureset.features[i].prob_feature;
 
         /* if headline has feature */
-        if ( headline.feature_vector % 2 == 1 ) { /* Only check first bit */
+        if (feature_vector % 2 == 1) { /* Only check first bit */
             /* multiply with p(CB|F) */
             prob *= pcbf;
         }
         else {
             /* multiply with p(CB|!F) */
-            prob *= ( 0.5 - pcbf * pf ) / ( 1 - pf );
+            prob *= _prob_given_not_feature(pcbf, pf);
         }
 
-        headline.feature_vector >>= 1;
+        feature_vector >>= 1;
     }
 
     return prob;
 }
 
 
-double _bernoulli_nb( Headline headline, Feature *features ) {
-    int8_t class_, i;
-    double score0 = log(0.5),
-           score1 = log(0.5),
-           p_f, p_cb_f, p_cb_nf;
+/**
+ * p(CB|!F)
+ */
 
-    for ( i = FEATURE_COUNT - 1; i >= 0; i-- ) {
-        p_f = features[i].prob_feature;
-        p_cb_f = features[i].prob_cb_given_feature;
-        p_cb_nf = ( 0.5 - p_cb_f * p_f ) / ( 1 - p_f );
-
-        /* if headline has feature */
-        if ( headline.feature_vector % 2 == 1 ) {
-            score0 += log(1 - p_cb_f);
-            score1 += log(p_cb_f);
-        }
-        else {
-            score0 += log(1 - p_cb_nf);
-            score1 += log(p_cb_nf);
-        }
-
-        headline.feature_vector >>= 1;
-    }
-
-    class_ = score0 > score1 ? 0 : 1;
-
-    /*printf("\n%s\nclass %d  label %d \t %5s %s \t s0 %-10f  s1 %-10f \n",
-        headline.title,
-        class_,
-        headline.labeled_clickbait,
-        class_ == headline.labeled_clickbait ? "true" : "false",
-        class_ == 1 ? "positive" : "negative",
-        score0,
-        score1
-    );*/
-
-    return class_;
+double _prob_given_not_feature(double pcbf, double pf)
+{
+    return ( 0.5 - pcbf * pf ) / ( 1 - pf );
 }

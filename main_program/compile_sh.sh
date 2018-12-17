@@ -1,2 +1,2 @@
 rm src/*.h.gch
-gcc -o build/main src/*.c -Wall -ansi -pedantic -lm
+gcc -o build/cbclassifier src/*.c -Wall -ansi -pedantic -lm

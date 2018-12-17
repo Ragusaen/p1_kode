@@ -1,10 +1,11 @@
-#ifndef DOUBLE_ARRAY_H
-#define DOUBLE_ARRAY_H
+#ifndef DOUBLE_H
+#define DOUBLE_H
 
 #define _USE_MATH_DEFINES 1
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <math.h>
 
 typedef struct DoubleArrayCalc {

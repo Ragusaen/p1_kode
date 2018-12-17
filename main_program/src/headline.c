@@ -1,79 +1,76 @@
 #include "headline.h"
 
-int import_csv(Headline **headlines, int *headline_count, char *file_path) {
+DataSet import_headline_csv(char file_path[])
+{
+    FILE *fp;
+    DataSet dataset;
+
     /* Open file with clickbait headlines */
-    FILE *dataset = _open_file(file_path);
+    if((fp = fopen(file_path, "r")) == NULL) fatal("Couldn't load dataset");
 
     /* Count the number of headlines */
-    *headline_count = _count_headlines(dataset);
+    dataset.count = _count_headlines(fp);
 
     /* Allocate memory for the struct */
-    if(dataset != NULL) {
-        *headlines = (Headline *)malloc(*headline_count * sizeof(Headline));
-        if(*headlines == NULL) {
-            printf("Error allocating memory for headlines!\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    /* Rewind the file pointer */
-    rewind(dataset);
+    if ((dataset.data = (Headline *) malloc(dataset.count * sizeof(Headline))) == NULL) fatal_error();
     
     /* Import all data from the file and insert it to the struct */
-    _read_headlines(dataset, *headlines, *headline_count);
+    _read_headlines(fp, dataset);
 
-    return 1;
-}
-
-/* ---------- FUNCTIONS ---------- */
-/* Open the file and return it to main */
-FILE *_open_file( char *file_path_str ) {
-    /* Open file with clickbait headlines */
-    FILE *dataset = fopen(file_path_str, "r");
-    /* Check if the file was opened correctly */
-    if(dataset == NULL) {
-        printf("Error reading file!\n");
-        exit(1);
-    }
     return dataset;
 }
 
-/* Count the number of headlines and return it to main */
-int _count_headlines(FILE *dataset) {
+
+/**
+ * Count the number of headlines and return it to main
+ */
+
+int _count_headlines(FILE *fp)
+{
     int lines = 0;
+
     /* Counts each line for every new line and until EOF, as to avoid terminating at commas etc. */
-    while ( !feof(dataset) ) {
-        if ( fgetc(dataset) == '\n' )
+    while (!feof(fp)) {
+        if (fgetc(fp) == '\n')
             lines++;
     }
+
+    /* Rewind the file pointer */
+    rewind(fp);
+
     return lines;
 }
 
-/* Read the file and insert it to the struct */
-void _read_headlines(FILE *dataset, Headline *headlines, int headline_count ) {
-    int i;
-    /* Gets one full line from the file at a time, until all headlines have been copied to the struct */
-    for ( i = 0; i < headline_count; i++ ) {
-        char buffer[FILE_BUFFER_LENGTH];
-        /* Makes sure the line isn't empty */
-        if ( fgets(buffer, FILE_BUFFER_LENGTH, dataset ) ) {
-            int j, cb_label = 0;
-            for (j=1; !(buffer[j-1] == '\"' && buffer[j] == ',') && j<FILE_BUFFER_LENGTH;j++);
-            buffer[j-1] = '\0';
-            /* Allocate memory for the each title */
-            headlines[i].title = (char*)malloc(j-1);
-            if ( headlines[i].title == NULL ) {
-                printf("Couldn't allocate memory for headline %d\n", i );
-                exit(EXIT_FAILURE);
-            }
-            /* Copies headline i into the struct */
-            strcpy( headlines[i].title, (buffer+1) );
+/**
+ * Read the file and insert it to the struct
+ */
 
-            sscanf(buffer + j + 1, " %d", &cb_label );
-            headlines[i].labeled_clickbait = cb_label;
-        } else {
-            printf("Couldn't read file line %d\n", i );
-            exit(EXIT_FAILURE);
-        }
+void _read_headlines(FILE *fp, DataSet dataset)
+{
+    int i = 0;
+    char buffer[FILE_BUFFER_LENGTH], *token;
+
+    /* Gets one full line from the file at a time, until all headlines have been copied to the struct */
+    while (fgets(buffer, FILE_BUFFER_LENGTH, fp) != NULL) {
+        if ((token = strchr(buffer, '\t')) == NULL) fatal("Couldn't parse line in dataset");
+
+        _parse_headline(dataset.data + i, buffer, token); i++;
     }
+}
+
+void _parse_headline(Headline *headline, char *buffer, char *token)
+{
+    int len, cb_label;
+    
+    len = (int) strlen(buffer) - strlen(token);
+
+    /* Allocate memory for the content */
+    if ((headline->content = (char*) malloc(len + 1)) == NULL ) fatal_error();
+
+    /* Copies headline i into the struct */
+    strncpy(headline->content, buffer, len);
+    headline->content[len] = '\0';
+
+    sscanf(buffer + len, " %d", &cb_label);
+    headline->labeled_clickbait = cb_label;
 }

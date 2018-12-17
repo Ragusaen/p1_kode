@@ -1,26 +1,36 @@
+#ifndef HEADLINE_H
+#define HEADLINE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef HEADLINE_H
-#define HEADLINE_H
+#include "errorhandler.h"
+#include "features.h"
 
 #define FILE_BUFFER_LENGTH 256
 
-#include "features.h"
 
 /* Struct for headlines for further processing */
 typedef struct Headline {
-  char *title;
-  uint8_t labeled_clickbait;
-  uint8_t classified_clickbait;
-  uint8_t feature_vector;
+    char    *content;
+    uint8_t labeled_clickbait;
+    uint8_t classified_clickbait;
+    uint8_t feature_vector;
+    double  prob_score;
 } Headline;
 
-int import_csv(Headline **headlines, int *headline_count, char *file_path);
+typedef struct DataSet {
+    Headline *data;
+    int count;
+} DataSet;
 
-FILE *_open_file();
-int _count_headlines(FILE *dataset);
-void _read_headlines(FILE *dataset, Headline headlines[], int headline_count );
+
+DataSet import_headline_csv(char file_path[]);
+
+int _count_headlines(FILE *fp);
+void _read_headlines(FILE *fp, DataSet dataset);
+void _parse_headline(Headline *headline, char *buffer, char *token);
+
 
 #endif
