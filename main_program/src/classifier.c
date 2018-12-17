@@ -1,62 +1,91 @@
 #include "classifier.h"
 
+/**
+ * Classify a dataset.
+ * 
+ * @param dataset       the dataset to classify
+ * @param featureset    a trained set of features
+ * @param threshold     the threshold to classify by
+ */
 
-
-void classify_dataset(DataSet set, FeatureSet featureset, double threshold)
+void classify_dataset(DataSet dataset, FeatureSet featureset, double threshold)
 {
     uint16_t i;
 
-    for ( i = 0; i < set.count; i++ ) {
-        classify(set.data + i, featureset, threshold);
+    for ( i = 0; i < dataset.count; i++ ) {
+        classify(dataset.data + i, featureset, threshold);
     }
 }
 
 
-
+/**
+ * Classify a headline item.
+ * 
+ * @param headline      a pointer to the headline item
+ * @param featureset    a trained set of features
+ * @param threshold     the threshold to classify by
+ */
 
 int8_t classify(Headline *headline, FeatureSet featureset, double threshold)
 {
+    /* set probability score */
     _score_headline(headline, featureset);
 
-    headline->classified_clickbait = threshold <= headline->prob_score;
+    /* classify headline */
+    headline->classified_clickbait = threshold <= headline->prob_score ? 1 : 0;
 
     return headline->classified_clickbait;
 }
 
 
+/**
+ * Add probability scores to a dataset.
+ * 
+ * @param dataset       the dataset to score
+ * @param featureset    a trained set of features
+ */
 
-
-void score_dataset(DataSet set, FeatureSet featureset)
+void score_dataset(DataSet dataset, FeatureSet featureset)
 {
     uint16_t i;
 
-    for ( i = 0; i < set.count; i++ ) {
-        _score_headline(set.data + i, featureset);
+    for ( i = 0; i < dataset.count; i++ ) {
+        _score_headline(dataset.data + i, featureset);
     }
 }
 
 
+/**
+ * Calculates an optimal threshold, the average of the two median scores of clickbait and non-clickbait.
+ * 
+ * @param dataset       the dataset to use for probability scores
+ * @param featureset    a trained set of features
+ */
 
-
-double calculate_threshold(DataSet set, FeatureSet featureset)
+double calculate_threshold(DataSet dataset, FeatureSet featureset)
 {
     int i, count_cb = 0, count_ncb = 0;
-    double threshold = 0.5, prob, *cb_probs, *ncb_probs;
+    double threshold = 0.5, prob_score, *cb_probs, *ncb_probs;
 
-    cb_probs = malloc(set.count * 0.5 * sizeof(double));
-    ncb_probs = malloc(set.count * 0.5 * sizeof(double));
+    /* two arrays of doubles, half size of dataset (50-50 distribution required) */
+    if ((cb_probs = malloc(dataset.count * 0.5 * sizeof(double))) == NULL ||
+        (ncb_probs = malloc(dataset.count * 0.5 * sizeof(double))) == NULL) fatal_error();
 
-    if (cb_probs == NULL || ncb_probs == NULL) fatal_error();
+    for (i = 0; i < dataset.count; i++) {
+        /* get probability score */
+        prob_score = _calculate_prob_score(
+            _get_feature_vector(dataset.data[i].content, featureset),
+            featureset
+        );
 
-    for (i = 0; i < set.count; i++) {
-        prob = _calculate_cb_prob(_get_feature_vector(set.data[i].content, featureset), featureset);
-
-        if (set.data[i].labeled_clickbait)
-            cb_probs[count_cb++] = prob;
+        /* add probability to either clickbait or non-clickbait array */
+        if (dataset.data[i].labeled_clickbait)
+            cb_probs[count_cb++] = prob_score;
         else
-            ncb_probs[count_ncb++] = prob;
+            ncb_probs[count_ncb++] = prob_score;
     }
 
+    /* sort both arrays (required by double_array_median) */
     double_array_sort(ncb_probs, count_ncb);
     double_array_sort(cb_probs, count_cb);
 
@@ -67,16 +96,20 @@ double calculate_threshold(DataSet set, FeatureSet featureset)
 }
 
 
-
+/**
+ * Set feature vector and probability score on headline.
+ */
 
 void _score_headline(Headline *headline, FeatureSet featureset)
 {
     headline->feature_vector = _get_feature_vector(headline->content, featureset);
-    headline->prob_score = _calculate_cb_prob(headline->feature_vector, featureset);
+    headline->prob_score = _calculate_prob_score(headline->feature_vector, featureset);
 }
 
 
-
+/**
+ * Create a feature vector based on the features detected in str.
+ */
 
 uint8_t _get_feature_vector(char str_in[], FeatureSet featureset)
 {
@@ -91,9 +124,11 @@ uint8_t _get_feature_vector(char str_in[], FeatureSet featureset)
 }
 
 
+/**
+ * Calculate probability score from a feature vector.
+ */
 
-
-double _calculate_cb_prob(uint8_t feature_vector, FeatureSet featureset)
+double _calculate_prob_score(uint8_t feature_vector, FeatureSet featureset)
 {
     double prob = 1;
     int8_t i;
@@ -119,7 +154,9 @@ double _calculate_cb_prob(uint8_t feature_vector, FeatureSet featureset)
 }
 
 
-
+/**
+ * p(CB|!F)
+ */
 
 double _prob_given_not_feature(double pcbf, double pf)
 {

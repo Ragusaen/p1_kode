@@ -14,8 +14,8 @@
 char* load_config(const char *key);
 int save_config(const char *key, const char *value);
 
-char* _get_config_key(char *line);
-char* _get_config_value(char *line);
+char* _get_config_part(int part, char *line);
+char* _get_substring(char *str, int length);
 
 
 #endif

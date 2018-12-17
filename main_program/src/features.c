@@ -1,5 +1,9 @@
 #include "features.h"
 
+/**
+ * Exports the features
+ */
+
 FeatureSet import_features()
 {
     uint8_t i = 0;

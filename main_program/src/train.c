@@ -1,5 +1,11 @@
 #include "train.h"
 
+/**
+ * Load trained features from binary file
+ * 
+ * @param featureset    a pointer to a featureset
+ */
+
 int load_trained_features(FeatureSet *featureset)
 {
     int i;
@@ -54,6 +60,11 @@ FeatureSet train_features(DataSet dataset)
     return featureset;
 }
 
+
+/**
+ * Add counts to every feature
+ */
+
 void _add_feature_count(Headline headline, FeatureSet featureset)
 {
     uint8_t j;
@@ -66,6 +77,11 @@ void _add_feature_count(Headline headline, FeatureSet featureset)
         }
     }
 }
+
+
+/**
+ * Calculate p(F) and p(CB|F)
+ */
 
 void _calculate_feature_probabilities(Feature *feature, int data_count)
 {
@@ -81,6 +97,10 @@ void _calculate_feature_probabilities(Feature *feature, int data_count)
     }
 }
 
+
+/**
+ * Save trained features to binary file
+ */
 
 int _save_trained_features(FeatureSet featureset)
 {

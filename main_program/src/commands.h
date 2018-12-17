@@ -30,6 +30,7 @@ typedef struct Commands {
 
 
 Commands import_commands();
+void _export_command(char name[], int (*func)(const char**), int i, Commands exported);
 
 int c_exit(const char **argv);
 int c_help(const char **argv);
@@ -38,12 +39,12 @@ int c_test(const char **argv);
 int c_threshold(const char **argv);
 
 
-void _export_command(char name[], int (*func)(const char**), int i, Commands exported);
-
+int _load_dataset_from_arg(const char **argv, DataSet *dataset, char *config_key);
 int _load_dataset(const char **argv, DataSet *dataset, int force_training);
 void _config_fallback(const char **argv, int i, char *config_key, char *value);
 int _flag_set(const char **argv, char *flag);
 int _is_value(const char *str);
+void _export_evaluation(const char **argv, EvaluationSet evaluation, char* fallback_path);
 double _get_threshold(const char **argv, int i);
 
 void _print_trained_features(FeatureSet featureset);
