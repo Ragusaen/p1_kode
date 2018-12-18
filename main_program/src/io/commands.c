@@ -241,7 +241,12 @@ int _command_classify(const char **argv)
     if (_flag_set(argv, "--vector") != -1)
         print_headline_features(headline.feature_vector, trained_features.count);
 
-    printf("Score: %f\tClickbait?  %s\n", headline.prob_score, cls ? "YES" : "NO");
+    printf(
+        "Score: %f\n"
+        "Clickbait: %s\n",
+        headline.prob_score,
+        cls ? "YES" : "NO"
+    );
 
     return 1;
 }
