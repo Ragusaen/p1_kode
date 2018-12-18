@@ -20,7 +20,7 @@ typedef struct Headline {
 typedef struct DataSet { Headline *data; int count; } DataSet;
 
 
-DataSet headline_import_dataset(char *);
+int headline_import_dataset(char *, DataSet *);
 
 
 #endif

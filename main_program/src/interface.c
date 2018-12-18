@@ -1,13 +1,14 @@
 #include "interface.h"
 
 #define CLI_BUFFER_SIZE 1024
-#define CLI_ARG_SIZE 128
+#define CLI_ARG_SIZE 64
 #define CLI_DELIMITER " \t\r\n"
 
 /* internal functions */
 static void _run_shell_loop(Commands);
 static int _run_command(const char *, const char **, Commands);
 static char** _parse_argv(char *);
+static int _read_string(char *, char *, char *);
 
 
 /**
@@ -94,44 +95,58 @@ int _run_command(const char *command, const char **argv, Commands cmdset)
 
 char** _parse_argv(char *line)
 {
-    int buffer_size = CLI_ARG_SIZE, i = 1, in_string = 0;
-    char **argv, *token, temp[CLI_BUFFER_SIZE];
+    int argc = 1, i = 0, len, buffer_size, is_str = 0;
+    char **argv;
 
-    if ((argv = malloc(buffer_size * sizeof(char*))) == NULL) fatal_error();
+    len = (int) strlen(line);
+    buffer_size = CLI_ARG_SIZE;
 
-    /* set first item to nothing (to match argv format of main) */
-    argv[0] = NULL;
+    if ((argv = (char**) malloc(buffer_size * sizeof(char*))) == NULL) fatal_error();
 
-    token = strtok(line, CLI_DELIMITER);
-
-    while (token != NULL) {
-        if (in_string) {
-            memset(temp, '\0', CLI_BUFFER_SIZE);
-            temp[0] = ' ';
-            strncpy(temp + 1, token, strlen(token));
-
-            if (temp[strlen(temp)-1] == '"') {
-                in_string = 0;
-                temp[strlen(temp)-1] = '\0';
-            }
-
-            strcat(argv[i-1], temp);
-        }
-        else {
-            argv[i++] = (in_string = token[0] == '"') ? token + 1 : token;
-        }
-
-        if (i >= buffer_size) {
+    while (i < len) {
+        if (argc >= buffer_size) {
             /* dynamically increase argv size */
             buffer_size += CLI_ARG_SIZE;
-            if ((argv = realloc(argv, buffer_size * sizeof(char*))) == NULL) fatal_error();
+            if ((argv = (char**) realloc(argv, buffer_size * sizeof(char*))) == NULL) fatal_error();
         }
 
-        token = strtok(NULL, CLI_DELIMITER);
+        is_str = line[i] == '"';
+
+        if (is_str || strchr(CLI_DELIMITER, line[i]) == NULL) {
+            if (is_str) i++;
+
+            if ((argv[argc] = (char*) malloc(CLI_BUFFER_SIZE)) == NULL) fatal_error();
+
+            i += _read_string(argv[argc], line + i, is_str ? "\"" : CLI_DELIMITER);
+            
+            argc++;
+        }
+        else i++;
     }
 
     /* end the array */
-    argv[i] = NULL;
+    argv[argc] = NULL;
 
     return argv;
+}
+
+
+/**
+ * Read a string until quotation mark met
+ */
+
+int _read_string(char *dest, char *src, char *delimiters)
+{
+    int i = 0, len = (int) strlen(src);
+    char buffer[CLI_BUFFER_SIZE];
+
+    while (i < len && strchr(delimiters, src[i]) == NULL) {
+        buffer[i] = src[i];
+        ++i;
+    }
+
+    buffer[i] = '\0';
+    strcpy(dest, buffer);
+
+    return (i + 1);
 }

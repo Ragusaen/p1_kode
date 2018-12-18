@@ -8,24 +8,26 @@ static void _read_headlines(FILE *, DataSet);
 static void _parse_headline(Headline *, char *, char *);
 
 
-DataSet headline_import_dataset(char file_path[])
+int headline_import_dataset(char file_path[], DataSet *dataset)
 {
     FILE *fp;
-    DataSet dataset;
 
     /* Open file with clickbait headlines */
-    if((fp = fopen(file_path, "r")) == NULL) fatal("Couldn't load dataset");
+    if((fp = fopen(file_path, "r")) == NULL) {
+        printf("Couldn't read file \"%s\"\n", file_path);
+        return 0;
+    }
 
     /* Count the number of headlines */
-    dataset.count = _count_headlines(fp);
+    dataset->count = _count_headlines(fp);
 
     /* Allocate memory for the struct */
-    if ((dataset.data = (Headline *) malloc(dataset.count * sizeof(Headline))) == NULL) fatal_error();
+    if ((dataset->data = (Headline *) malloc(dataset->count * sizeof(Headline))) == NULL) fatal_error();
     
     /* Import all data from the file and insert it to the struct */
-    _read_headlines(fp, dataset);
+    _read_headlines(fp, *dataset);
 
-    return dataset;
+    return 1;
 }
 
 

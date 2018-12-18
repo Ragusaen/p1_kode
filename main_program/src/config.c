@@ -20,7 +20,7 @@ char* load_config(const char *key)
 
     if ((fp = fopen(CONFIG_FN, "r")) == NULL) return "";
 
-    while (fgets(buffer, CONFIG_LINE_LEN, fp) != NULL) {
+    while (fgets(buffer, CONFIG_LINE_LEN, fp)) {
         if (strcmp(key, _get_config_part(0, buffer)) == 0) {
             return _get_config_part(1, buffer);
         }
@@ -36,9 +36,11 @@ char* load_config(const char *key)
 
 int save_config(const char *key, const char *value)
 {
-    int wrote_config = 0;
-    char buffer[CONFIG_LINE_LEN], output[CONFIG_MAX_FILESIZE] = "";
+    int len, saved = 0;
+    char buffer[CONFIG_LINE_LEN], output[CONFIG_MAX_FILESIZE], *n;
     FILE *fp;
+
+    memset(output, '\0', CONFIG_MAX_FILESIZE);
 
     /* first, open config file for reading (created if not existing) */
     if ((fp = fopen(CONFIG_FN, "ab+")) == NULL) {
@@ -46,24 +48,27 @@ int save_config(const char *key, const char *value)
         return 0;
     }
 
-    /* read all lines of config file */
-    while (fgets(buffer, CONFIG_LINE_LEN, fp) != NULL) {
-        if (strcmp(key, _get_config_part(0, buffer)) == 0) {
-            /* overwrite */
-            sprintf(output + strlen(output), "%s %s\n", key, value);
-            wrote_config = 1;
+    /* read all lines of config file, skip line matching key */
+    while (fgets(buffer, CONFIG_LINE_LEN, fp)) {
+        if (strcmp(key, _get_config_part(0, buffer)) != 0) {
+            len = (int) strlen(buffer);
+
+            /* remove newline characters */
+            if ((n = strpbrk(buffer, "\r\n")) != NULL)
+                len -= (int) strlen(n);
+
+            sprintf(output + strlen(output), "%s\n", _get_substring(buffer, len));
         }
         else {
-            /* remove '\n' before end of line */
-            buffer[strlen(buffer)-2] = '\0';
-            /* copy to output */
-            sprintf(output + strlen(output), "%s\n", buffer);
+            sprintf(output + strlen(output), "%s\t%s\n", key, value);
+            saved = 1;
         }
     }
 
-    /* key wasn't found in config, append */
-    if (wrote_config == 0)
-        sprintf(output + strlen(output), "%s %s\n", key, value);
+    if (!saved)
+        sprintf(output + strlen(output), "%s\t%s\n", key, value);
+
+    output[strlen(output)] = '\0';
 
     fclose(fp);
 
@@ -88,15 +93,25 @@ int save_config(const char *key, const char *value)
 
 char* _get_config_part(int part, char *line)
 {
-    char *value, *token;
+    int len;
+    char *value, *token, *n;
 
-    if ((token = strchr(line, ' ')) == NULL)
+    if ((token = strchr(line, '\t')) == NULL)
         return "";
 
-    if (part == 0)
-        value = _get_substring(line, (int) strlen(line) - strlen(token));
-    else
-        value = _get_substring(token + 1, strlen(token) - 2);
+    if (part == 0) {
+        len = (int) strlen(line) - strlen(token);
+        value = _get_substring(line, len);
+    }
+    else {
+        len = (int) strlen(token) - 1;
+
+        /* remove newline characters */
+        if ((n = strpbrk(line, "\r\n")) != NULL)
+            len -= (int) strlen(n);
+
+        value = _get_substring(token + 1, len);
+    }
 
     return value;
 }
