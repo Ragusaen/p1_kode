@@ -1,2 +1,2 @@
 rm src/*.h.gch
-gcc -o build/cbclassifier src/*.c -Wall -ansi -pedantic -lm
+gcc -Iinclude "src/ext/*.c" "src/io/*.c" "src/core/*.c" "src/main.c" -o "bin/classifier.exe" -Wall -ansi -pedantic -lm

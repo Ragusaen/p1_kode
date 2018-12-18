@@ -1,4 +1,4 @@
-#include "classifier.h"
+#include "core/classifier.h"
 
 /* internal functions */
 static void _score_headline(Headline *, FeatureSet);

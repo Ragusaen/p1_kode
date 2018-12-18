@@ -1,4 +1,4 @@
-#include "test.h"
+#include "core/test.h"
 
 /* internal functions */
 static ResultCounter _count_thresholds_positives_negatives(DataSet);

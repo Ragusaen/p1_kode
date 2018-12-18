@@ -1,6 +1,6 @@
-#include "config.h"
+#include "io/config.h"
 
-#define CONFIG_FN "cbclassifier.config"
+#define CONFIG_FN "classifier.config"
 #define CONFIG_LINE_LEN 255
 #define CONFIG_MAX_FILESIZE 1024
 

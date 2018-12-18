@@ -1,4 +1,4 @@
-#include "double.h"
+#include "ext/double.h"
 
 /* internal functions */
 static int _compare_doubles(const void *, const void *);

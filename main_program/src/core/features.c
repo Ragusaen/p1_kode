@@ -1,4 +1,4 @@
-#include "features.h"
+#include "core/features.h"
 
 #define MIN_WORD_LENGTH 8
 #define MIN_AVERAGE_WORD_LENGTH 4.5

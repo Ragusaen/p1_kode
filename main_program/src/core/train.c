@@ -1,6 +1,6 @@
-#include "train.h"
+#include "core/train.h"
 
-#define TRAINED_FEATURES_FN "trainedfeatures.bin"
+#define TRAINED_FEATURES_FN "bin/trainedfeatures.bin"
 
 /* internal function */
 static void _add_feature_count(Headline, FeatureSet);

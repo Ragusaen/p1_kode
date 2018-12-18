@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#include "features.h"
-#include "test.h"
+#include "core/features.h"
+#include "core/test.h"
 
 
 void print_command_list(void);

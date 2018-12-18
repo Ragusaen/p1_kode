@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 
-#include "interface.h"
+#include "io/interface.h"
 
 
 int main(int argc, const char **argv)

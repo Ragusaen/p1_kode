@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "errorhandler.h"
+#include "io/errorhandler.h"
 
 #define FEATURE_NAME_LEN 28
 

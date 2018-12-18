@@ -8,11 +8,11 @@
 #include "errorhandler.h"
 #include "config.h"
 #include "print.h"
-#include "classifier.h"
-#include "headline.h"
-#include "features.h"
-#include "train.h"
-#include "test.h"
+#include "core/classifier.h"
+#include "core/headline.h"
+#include "core/features.h"
+#include "core/train.h"
+#include "core/test.h"
 
 
 #define COMMAND_NAME_LEN 10

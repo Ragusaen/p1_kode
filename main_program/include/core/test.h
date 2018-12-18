@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "errorhandler.h"
+#include "io/errorhandler.h"
 #include "headline.h"
 #include "classifier.h"
 

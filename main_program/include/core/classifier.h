@@ -4,10 +4,10 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "errorhandler.h"
+#include "io/errorhandler.h"
+#include "ext/double.h"
 #include "headline.h"
 #include "features.h"
-#include "double.h"
 
 
 void classifier_classify_dataset(DataSet, FeatureSet, double);

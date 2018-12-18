@@ -1,4 +1,4 @@
-#include "headline.h"
+#include "core/headline.h"
 
 #define FILE_BUFFER_LENGTH 256
 
