@@ -12,7 +12,7 @@ static char** _parse_argv(char *);
 
 /**
  * Initializes the command line interface.
- * 
+ *
  * @param argc  number of arguments
  * @param argv  array of arguments
  */
@@ -44,9 +44,14 @@ void _run_shell_loop(Commands cmdset)
     printf("Enter 'help' to get a list of commands. Enter 'exit' to terminate program.\n\n");
 
     do {
+        char c;
+
         /* get user input */
         printf("> ");
-        gets(line);
+        scanf("%[^\n]s",line);
+
+        /* Clear input buffer */
+        while( (c = getchar()) != '\n' && c != EOF );
 
         /* parse the input */
         argv = _parse_argv(line);
@@ -104,7 +109,7 @@ char** _parse_argv(char *line)
             memset(temp, '\0', CLI_BUFFER_SIZE);
             temp[0] = ' ';
             strncpy(temp + 1, token, strlen(token));
-            
+
             if (temp[strlen(temp)-1] == '"') {
                 in_string = 0;
                 temp[strlen(temp)-1] = '\0';
