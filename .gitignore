@@ -1,4 +1,5 @@
-main_program/build/*
+main_program/bin/*
 *.o
 *.h.gch
 *.bin
+*.csv
