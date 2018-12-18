@@ -1,4 +1,13 @@
-#include "evaluation.h"
+#include "test.h"
+
+/* internal functions */
+static ResultCounter _count_thresholds_positives_negatives(DataSet);
+static ResultCounter _count_true_false_positives(DataSet);
+static ConfusionMatrix _calc_confusion_matrix(int, int, int, int, double);
+static int _sort_by_probability_desc(const void *, const void *);
+static void _write_evaluation_data(FILE *, ConfusionMatrix);
+static char* _csv_double(double);
+
 
 /**
  * Evaluates the classifier at all thresholds, outputs an EvaluationSet with an array of Confusion Matrixes.
@@ -6,10 +15,11 @@
  * @param dataset   a dataset with calculated probabilities
  */
 
-EvaluationSet evaluate_classifier(DataSet dataset) {
+EvaluationSet test_classifier(DataSet dataset)
+{
     int i, output_i = 0;
     double threshold = 1;
-    EvaluationSet set;
+    EvaluationSet evaluation;
     ResultCounter c;
 
     /* sort the dataset from highest to lowest probability */
@@ -19,14 +29,14 @@ EvaluationSet evaluate_classifier(DataSet dataset) {
     c = _count_thresholds_positives_negatives(dataset);
     
     /* initialize the EvaluationSet */
-    set.count = c.thresholds;
-    if ((set.data = (ConfusionMatrix*) calloc(set.count, sizeof(ConfusionMatrix))) == NULL) fatal_error();
+    evaluation.count = c.thresholds;
+    if ((evaluation.data = (ConfusionMatrix*) calloc(evaluation.count, sizeof(ConfusionMatrix))) == NULL) fatal_error();
     
     for (i = 0; i < dataset.count; i++) {
         /* if the probability is not equal to current threshold */
         if (dataset.data[i].prob_score != threshold) {
             /* add ConfusionMatrix with current counts to EvaluationSet */
-            set.data[output_i++] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
+            evaluation.data[output_i++] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
             /* set new threshold */
             threshold = dataset.data[i].prob_score;
         }
@@ -36,9 +46,9 @@ EvaluationSet evaluate_classifier(DataSet dataset) {
     }
 
     /* add the last ConfusionMatrix with the final count */
-    set.data[output_i] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
+    evaluation.data[output_i] = _calc_confusion_matrix(c.P, c.N, c.TP, c.FP, threshold);
 
-    return set;
+    return evaluation;
 }
 
 
@@ -49,7 +59,7 @@ EvaluationSet evaluate_classifier(DataSet dataset) {
  * @param threshold     will be passed to the ConfusionMatrix
  */
 
-ConfusionMatrix evaluate_classification(DataSet dataset, double threshold)
+ConfusionMatrix test_classification(DataSet dataset, double threshold)
 {
     ResultCounter result;
     ConfusionMatrix cm;
@@ -67,22 +77,22 @@ ConfusionMatrix evaluate_classification(DataSet dataset, double threshold)
 /**
  * Calculates the area under the ROC curve.
  * 
- * @param set   an EvaluationSet which contains an array of Confusion Matrixes.
+ * @param evaluation   an EvaluationSet which contains an array of Confusion Matrixes.
  */
 
-double calculate_AUC(EvaluationSet set)
+double test_calculate_auc(EvaluationSet evaluation)
 {
     int i;
     double auc = 0.0, x_1, y_1, x_2, y_2;
 
     /* set first point */
-    x_1 = set.data[0].FPR;
-    y_1 = set.data[0].TPR;
+    x_1 = evaluation.data[0].FPR;
+    y_1 = evaluation.data[0].TPR;
 
-    for (i = 1; i < set.count; i++) {
+    for (i = 1; i < evaluation.count; i++) {
         /* set second point */
-        x_2 = set.data[i].FPR;
-        y_2 = set.data[i].TPR;
+        x_2 = evaluation.data[i].FPR;
+        y_2 = evaluation.data[i].TPR;
 
         /* add area under points to sum */
         auc += 0.5 * (x_2 - x_1) * (y_2 + y_1);
@@ -99,11 +109,11 @@ double calculate_AUC(EvaluationSet set)
 /**
  * Exports the EvaluationSet to a CSV file.
  * 
- * @param set       an EvaluationSet created by evaluate_classifier
- * @param filename  the path and filename for the CSV file
+ * @param evaluation    an EvaluationSet created by test_classifier
+ * @param filename      the path and filename for the CSV file
  */
 
-void write_evaluation_file(EvaluationSet set, const char *filename)
+void test_export_file(EvaluationSet evaluation, const char *filename)
 {
     int i;
     FILE *fp;
@@ -116,8 +126,8 @@ void write_evaluation_file(EvaluationSet set, const char *filename)
     );
 
     /* write data */
-    for (i = 0; i < set.count; i++) {
-        _write_evaluation_data(fp, set.data[i]);
+    for (i = 0; i < evaluation.count; i++) {
+        _write_evaluation_data(fp, evaluation.data[i]);
     }
 
     fclose(fp);

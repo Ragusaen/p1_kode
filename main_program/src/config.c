@@ -1,5 +1,14 @@
 #include "config.h"
 
+#define CONFIG_FN "cbclassifier.config"
+#define CONFIG_LINE_LEN 255
+#define CONFIG_MAX_FILESIZE 1024
+
+/* internal functions */
+static char* _get_config_part(int, char *);
+static char* _get_substring(char *, int);
+
+
 /**
  * Gets a value stored with 'key'
  */

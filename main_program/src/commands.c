@@ -1,22 +1,44 @@
 #include "commands.h"
 
+#define MAX_FN_LEN 255
+
+
+/* internal functions */
+static void _export_command(char *, int (*)(const char**), int, Commands);
+
+static int _command_exit(const char **);
+static int _command_help(const char **);
+static int _command_train(const char **);
+static int _command_test(const char **);
+static int _command_threshold(const char **);
+static int _command_classify(const char **);
+
+static int _load_dataset_from_arg(const char **, DataSet *, char *);
+static int _load_dataset(const char **, DataSet *, int);
+static void _config_fallback(const char **, int, char *, char *);
+static int _flag_set(const char **, char *);
+static int _is_value(const char *);
+static void _export_evaluation(const char **, EvaluationSet, char *);
+static double _get_threshold(const char **, int);
+
+
 /**
  * Exports the commands
  */
 
-Commands import_commands()
+Commands commands_import(void)
 {
     int i = 0;
     Commands exported;
 
     if ((exported.commands = (Command*) calloc(6, sizeof(Command))) == NULL) fatal_error();
 
-    _export_command("exit", c_exit, i++, exported);
-    _export_command("help", c_help, i++, exported);
-    _export_command("train", c_train, i++, exported);
-    _export_command("test", c_test, i++, exported);
-    _export_command("threshold", c_threshold, i++, exported);
-    _export_command("classify", c_classify, i++, exported);
+    _export_command("exit", _command_exit, i++, exported);
+    _export_command("help", _command_help, i++, exported);
+    _export_command("train", _command_train, i++, exported);
+    _export_command("test", _command_test, i++, exported);
+    _export_command("threshold", _command_threshold, i++, exported);
+    _export_command("classify", _command_classify, i++, exported);
 
     exported.count = i;
 
@@ -35,7 +57,7 @@ void _export_command(char name[], int (*func)(const char**), int i, Commands exp
  * Command: exit
  */
 
-int c_exit(const char **argv)
+int _command_exit(const char **argv)
 {
     return 0;
 }
@@ -47,39 +69,9 @@ int c_exit(const char **argv)
  * Command: help
  */
 
-int c_help(const char **argv)
+int _command_help(const char **argv)
 {
-    printf("\nCOMMANDS\n");
-    _print_thick_line();
-    printf(
-        "train [path]\tTrain features on training set (path optional, if in config)\n"
-        "\n"
-        "\tFlags:\t--print:       print trained features\n"
-    );
-    _print_thin_line();
-    printf(
-        "test [path]\tRun evaluation on test set (path optional, if in config)\n"
-        "\n"
-        "\tFlags:\t--print:       print evaluation data\n"
-        "\t      \t--save [path]: export CSV data\n"
-    );
-    _print_thin_line();
-    printf(
-        "threshold [number]\tGet saved threshold, number only used if flags set\n"
-        "\n"
-        "\tSubr.:\t-calc:            calculate optimal threshold\n"
-        "\n"
-        "\tFlags:\t--from [dataset]: either 'test' (default) or 'training'\n"
-        "\t      \t--print:          print confusion matrix based on threshold\n"
-        "\t      \t--save:           save threshold to config\n"
-    );
-    _print_thin_line();
-    printf(
-        "classify \"text\" [--threshold N]\tClassify a single headline (text)\n"
-        "\n"
-        "\tFlags:\t--threshold N:    set new threshold (N)\n"
-    );
-    _print_thick_line();
+    print_command_list();
 
     return 1;
 }
@@ -94,7 +86,7 @@ int c_help(const char **argv)
  * --print  output list to screen
  */
 
-int c_train(const char **argv)
+int _command_train(const char **argv)
 {
     DataSet training_set;
     FeatureSet trained_features;
@@ -109,7 +101,7 @@ int c_train(const char **argv)
 
     /* if flag '--print', output the list of features */
     if (_flag_set(argv, "--print") != -1)
-        _print_trained_features(trained_features);
+        print_trained_features(trained_features);
 
     return 1;
 }
@@ -125,7 +117,7 @@ int c_train(const char **argv)
  * --save   export list to file
  */
 
-int c_test(const char **argv)
+int _command_test(const char **argv)
 {
     DataSet test_set;
     FeatureSet trained_features;
@@ -136,23 +128,23 @@ int c_test(const char **argv)
         return 1;
 
     /* load trained features */
-    if (!load_trained_features(&trained_features)) {
+    if (!train_import_features(&trained_features)) {
         error("Features not trained");
         return 1;
     }
 
     /* score the dataset */
-    score_dataset(test_set, trained_features);
+    classifier_score_dataset(test_set, trained_features);
 
     /* calculate confusion matrix for all thresholds */
-    evaluation = evaluate_classifier(test_set);
+    evaluation = test_classifier(test_set);
 
     /* if flag '--print', output a list of key values */
     if (_flag_set(argv, "--print") != -1)
-        _print_evaluation(evaluation);
+        print_evaluation(evaluation);
 
     /* output the ROC-AUC */
-    printf("ROC-AUC = %f\n", calculate_AUC(evaluation));
+    printf("ROC-AUC = %f\n", test_calculate_auc(evaluation));
 
     /* export the results */
     _export_evaluation(argv, evaluation, "test_results.csv");
@@ -164,16 +156,16 @@ int c_test(const char **argv)
 /**
  * Gets, sets, or calculates threshold.
  * 
- * Command: threshold [number] [-calc [--from]] [--print] [--save]
+ * Command: threshold [number] [--calc [--from]] [--print] [--save]
  * 
- * number   set new threshold (not saved if '-calc' or '--print' is used)
- * -calc    calculate optimal threshold
+ * number   set new threshold (not saved if '--calc' or '--print' is used)
+ * --calc    calculate optimal threshold
  *  --from  dataset to use, either 'test' (default) or 'training'
  * --print  output confusion matrix to screen
  * --save   save threshold to config
  */
 
-int c_threshold(const char **argv)
+int _command_threshold(const char **argv)
 {
     double threshold;
     char threshold_str[MAX_FN_LEN];
@@ -182,13 +174,13 @@ int c_threshold(const char **argv)
     ConfusionMatrix cm;
 
     /* only load test dataset and trained features if necessary */
-    if ((_flag_set(argv, "-calc") != -1 || _flag_set(argv, "--print") != -1) &&
-        (!_load_dataset(argv, &dataset, 0) || !load_trained_features(&trained_features)))
+    if ((_flag_set(argv, "--calc") != -1 || _flag_set(argv, "--print") != -1) &&
+        (!_load_dataset(argv, &dataset, 0) || !train_import_features(&trained_features)))
         return 1;
 
-    if (_flag_set(argv, "-calc") != -1) {
+    if (_flag_set(argv, "--calc") != -1) {
         /* calculate optimal threshold */
-        threshold = calculate_threshold(dataset, trained_features);
+        threshold = classifier_calculate_threshold(dataset, trained_features);
 
         if (_flag_set(argv, "--save") != -1) {
             /* save calculated threshold in config */
@@ -207,11 +199,11 @@ int c_threshold(const char **argv)
 
     if (_flag_set(argv, "--print") != -1) {
         /* classify the dataset */
-        classify_dataset(dataset, trained_features, threshold);
+        classifier_classify_dataset(dataset, trained_features, threshold);
         /* calculate confusion matrix */
-        cm = evaluate_classification(dataset, threshold);
+        cm = test_classification(dataset, threshold);
         /* output confusion matrix to screen */
-        _print_confusion_matrix(cm);
+        print_confusion_matrix(cm);
     }
 
     return 1;
@@ -226,7 +218,7 @@ int c_threshold(const char **argv)
  * --threshold  set new threshold (N)
  */
 
-int c_classify(const char **argv)
+int _command_classify(const char **argv)
 {
     int cls, i;
     double threshold;
@@ -236,7 +228,7 @@ int c_classify(const char **argv)
     i = _flag_set(argv, "--threshold");
 
     if (!_is_value(argv[2]) ||
-        !load_trained_features(&trained_features) ||
+        !train_import_features(&trained_features) ||
         (threshold = _get_threshold(argv, i != -1 ? (i+1) : -1)) == -1)
         return 1;
 
@@ -244,7 +236,10 @@ int c_classify(const char **argv)
 
     strcpy(headline.content, argv[2]);
 
-    cls = classify(&headline, trained_features, threshold);
+    cls = classifier_classify_headline(&headline, trained_features, threshold);
+
+    if (_flag_set(argv, "--vector") != -1)
+        print_headline_features(headline.feature_vector, trained_features.count);
 
     printf("Score: %f\tClickbait?  %s\n", headline.prob_score, cls ? "YES" : "NO");
 
@@ -268,7 +263,7 @@ int _load_dataset_from_arg(const char **argv, DataSet *dataset, char *config_key
         return 0;
     }
 
-    *dataset = import_headline_csv(filename);
+    *dataset = headline_import_dataset(filename);
     printf("Imported \"%s\", with %d records.\n", filename, dataset->count);
 
     return 1;
@@ -294,7 +289,7 @@ int _load_dataset(const char **argv, DataSet *dataset, int force_training)
         return 0;
     }
 
-    *dataset = import_headline_csv(filename);
+    *dataset = headline_import_dataset(filename);
 
     return 1;
 }
@@ -356,7 +351,7 @@ void _export_evaluation(const char **argv, EvaluationSet evaluation, char* fallb
         _config_fallback(argv, (i+1), "TEST_SAVE_PATH", save_path);
 
         /* export file */
-        write_evaluation_file(evaluation, strlen(save_path) != 0 ? save_path : fallback_path);
+        test_export_file(evaluation, strlen(save_path) != 0 ? save_path : fallback_path);
     }
 }
 
@@ -392,121 +387,4 @@ double _get_threshold(const char **argv, int i)
     printf("Threshold is set to: %f\n", threshold);
 
     return threshold;
-}
-
-
-/**
- * Outputs a list of trained features
- */
-
-void _print_trained_features(FeatureSet featureset)
-{
-    uint8_t i;
-    printf("\n%-23s %10s %10s %10s\n", "Feature", "p(CB|F)", "p(CB|!F)", "p(F)");
-
-    for ( i = 0; i < featureset.count; i++ ) {
-        _print_feature(featureset.features[i]);
-    }
-}
-
-void _print_feature(Feature feature)
-{
-    printf("%-23s %10.4f %10.4f %10.4f\n",
-        feature.name,
-        feature.prob_cb_given_feature,
-        ( 0.5 - feature.prob_cb_given_feature * feature.prob_feature ) / ( 1 - feature.prob_feature ),
-        feature.prob_feature
-    );
-}
-
-
-/**
- * Prints a list of key values from an evaluation set (array of confusion matrixes)
- */
-
-void _print_evaluation(EvaluationSet evaluation)
-{
-    int i;
-
-    printf("\nCLASSIFIER EVALUATION\n");
-    _print_key_values_header();
-
-    for (i = 0; i < evaluation.count; i++) {
-        _print_key_values(evaluation.data[i]);
-    }
-
-    _print_thick_line();
-}
-
-
-/**
- * Prints a confusion matrix, with all associated scores
- */
-
-void _print_confusion_matrix(ConfusionMatrix cm)
-{
-    printf("\n%-40s%30s%10f\n", "CONFUSION MATRIX", "Threshold", cm.threshold);
-    _print_thick_line();
-    printf(
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f    %3s: %.4f\n",
-        "Total", cm.total, "CP", cm.P, "CN", cm.N, "Prior", cm.prior, "ACC", cm.ACC
-    );
-    _print_thin_line();
-    printf(
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f    %3s: %.4f\n"
-        "%5s: %-6d  |  %5s: %-6d  %5s: %-6d  |  %5s: %.4f    %3s: %.4f\n",
-        "PCP", cm.PP, "TP", cm.TP, "FP", cm.FP, "*PPV", cm.PPV, "FDR", cm.FDR,
-        "PCN", cm.PN, "FN", cm.FN, "TN", cm.TN, "FOR", cm.FOR, "NPV", cm.NPV
-    );
-    _print_thin_line();
-    printf(
-        "%13s  |  %5s: %.4f  %5s: %.4f  |  %5s: %.4f\n"
-        "%13s  |  %5s: %.4f  %5s: %.4f  |  %5s: %.4f    %3s: %.4f\n"
-        "%13s  |  %28s  |  %5s: %.4f    %3s: %.4f\n",
-        "", "**TPR", cm.TPR, "FPR", cm.FPR, "LR+", cm.LRP,
-        "", "FNR", cm.FNR, "TNR", cm.TNR, "LR-", cm.LRN, "F1", cm.F1,
-        "", "", "DOR", cm.DOR, "MCC", cm.MCC
-    );
-    _print_thick_line();
-    printf("%80s\n", "* Precision   ** Recall");
-
-    printf("\nKEY VALUES\n");
-    _print_key_values_header();
-    _print_key_values(cm);
-    _print_thick_line();
-}
-
-void _print_key_values_header()
-{
-    _print_thick_line();
-    printf("%-12s%-12s%-12s%-12s%-12s%-12s%-12s\n",
-        "Threshold", "Accuracy", "Precision", "Recall", "Fall-out", "F1 score", "MCC"
-    );
-    _print_thin_line();
-}
-
-void _print_key_values(ConfusionMatrix cm)
-{
-    printf("%-12.6f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f%-12.4f\n",
-        cm.threshold, cm.ACC, cm.PPV, cm.TPR, cm.FPR, cm.F1, cm.MCC
-    );
-}
-
-void _print_headline_features(uint8_t feature_vector, int count) {
-    int i;
-
-    for (i = count - 1; i >= 0; i--) {
-        printf("%u", feature_vector % 2 == 1 ? 1 : 0);
-        feature_vector >>= 1;
-    }
-}
-
-void _print_thin_line()
-{
-    printf("--------------------------------------------------------------------------------\n");
-}
-
-void _print_thick_line()
-{
-    printf("================================================================================\n");
 }

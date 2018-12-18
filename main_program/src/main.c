@@ -13,7 +13,7 @@
 
 int main(int argc, const char **argv)
 {
-    cli_init(argc, argv);
+    interface_init(argc, argv);
 
     return EXIT_SUCCESS;
 }

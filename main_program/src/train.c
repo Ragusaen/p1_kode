@@ -1,18 +1,27 @@
 #include "train.h"
 
+#define TRAINED_FEATURES_FN "trainedfeatures.bin"
+
+/* internal function */
+static void _add_feature_count(Headline, FeatureSet);
+static void _calculate_feature_probabilities(Feature *, int);
+static int _export_binary(FeatureSet);
+static void _copy_feature(Feature *, Feature);
+
+
 /**
  * Load trained features from binary file
  * 
  * @param featureset    a pointer to a featureset
  */
 
-int load_trained_features(FeatureSet *featureset)
+int train_import_features(FeatureSet *featureset)
 {
     int i;
     FILE *fp;
     FeatureSet temp;
 
-    *featureset = import_features();
+    *featureset = features_import();
     if ((temp.features = (Feature*) calloc(featureset->count, sizeof(Feature))) == NULL) fatal_error();
 
     if ((fp = fopen(TRAINED_FEATURES_FN, "r")) == NULL) {
@@ -43,7 +52,7 @@ FeatureSet train_features(DataSet dataset)
     FeatureSet featureset;
     
     /* import features */
-    featureset = import_features();
+    featureset = features_import();
 
     /* count number of features for each headline */
     for ( i = 0; i < dataset.count; i++ ) {
@@ -55,7 +64,7 @@ FeatureSet train_features(DataSet dataset)
         _calculate_feature_probabilities(featureset.features + i, dataset.count);
     }
 
-    _save_trained_features(featureset);
+    _export_binary(featureset);
 
     return featureset;
 }
@@ -102,7 +111,7 @@ void _calculate_feature_probabilities(Feature *feature, int data_count)
  * Save trained features to binary file
  */
 
-int _save_trained_features(FeatureSet featureset)
+int _export_binary(FeatureSet featureset)
 {
     int i;
     FILE *fp;

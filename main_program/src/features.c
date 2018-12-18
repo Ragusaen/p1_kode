@@ -1,28 +1,59 @@
 #include "features.h"
 
+#define MIN_WORD_LENGTH 8
+#define MIN_AVERAGE_WORD_LENGTH 4.5
+#define MIN_TOTAL_LENGTH 40
+#define AMOUNT_OF_SPECIAL_WORDS 7
+#define AMOUNT_OF_PRONOUNS 10
+#define MAX_STOP_WORDS 2
+#define AMOUNT_OF_STOP_WORDS 13
+#define MIN_CAPS_LEN 4
+
+
+/* internal functions */
+
+static void _export_feature(char *, uint8_t (*)(char*), uint8_t, FeatureSet);
+
+static uint8_t _feature_no_long_word(char *);
+static uint8_t _feature_low_average_word_length(char *);
+static uint8_t _feature_is_short(char *);
+static uint8_t _feature_special_punctuation(char *);
+static uint8_t _feature_special_words(char *);
+static uint8_t _feature_pronouns(char *);
+static uint8_t _feature_stop_words(char *);
+static uint8_t _feature_adverbs(char *);
+static uint8_t _feature_no_numbers(char *);
+static uint8_t _feature_caps(char *);
+
+static char * _string_lower(char *);
+static int _str_count_words(char *, char **, int);
+static uint8_t _match_whole_word(char *, char *);
+static uint8_t _match_end_of_word(char *, char *);
+static uint8_t _match_word_condition(char *, char *, int (*)(int), int (*)(int));
+static int _char_is_punct_or_space(int);
+
+
 /**
  * Exports the features
  */
 
-FeatureSet import_features()
+FeatureSet features_import(void)
 {
     uint8_t i = 0;
     FeatureSet exported;
 
     if ((exported.features = (Feature*) calloc(12, sizeof(Feature))) == NULL) fatal_error();
 
-    _export_feature("no_long_word",            f_no_long_word,             i++, exported);
-    _export_feature("low_average_word_length", f_low_average_word_length,  i++, exported);
-    _export_feature("is_short",                f_is_short,                 i++, exported);
-    _export_feature("special_punctuation",     f_special_punctuation,      i++, exported);
-    /*_export_feature("quotation",               f_quotation,                i++, exported);*/
-    /*_export_feature("colon",                   f_colon,                    i++, exported);*/
-    _export_feature("special_words",           f_special_words,            i++, exported);
-    _export_feature("pronouns",                f_pronouns,                 i++, exported);
-    _export_feature("stop_words",              f_stop_words,               i++, exported);
-    _export_feature("adverbs",                 f_adverbs,                  i++, exported);
-    _export_feature("no_numbers",              f_no_numbers,               i++, exported);
-    _export_feature("caps",                    f_caps,                     i++, exported);
+    _export_feature("no_long_word",            _feature_no_long_word,             i++, exported);
+    _export_feature("low_average_word_length", _feature_low_average_word_length,  i++, exported);
+    _export_feature("is_short",                _feature_is_short,                 i++, exported);
+    _export_feature("special_punctuation",     _feature_special_punctuation,      i++, exported);
+    _export_feature("special_words",           _feature_special_words,            i++, exported);
+    _export_feature("pronouns",                _feature_pronouns,                 i++, exported);
+    _export_feature("stop_words",              _feature_stop_words,               i++, exported);
+    _export_feature("adverbs",                 _feature_adverbs,                  i++, exported);
+    _export_feature("no_numbers",              _feature_no_numbers,               i++, exported);
+    _export_feature("caps",                    _feature_caps,                     i++, exported);
     
     exported.count = i;
 
@@ -40,7 +71,7 @@ void _export_feature(char name[], uint8_t (*func)(char*), uint8_t i, FeatureSet 
  * Checks if headline only contains words less than 8 characters long.
  */
 
-uint8_t f_no_long_word(char str_in[])
+uint8_t _feature_no_long_word(char str_in[])
 {
     int longest_word_length = 0,
         curr_word_length = 0,
@@ -67,7 +98,7 @@ uint8_t f_no_long_word(char str_in[])
  * Checks if the headline's average word length is below 4.5.
  */
 
-uint8_t f_low_average_word_length(char str_in[])
+uint8_t _feature_low_average_word_length(char str_in[])
 {
     int i = 0,
         word_length_sum = 0,
@@ -76,7 +107,7 @@ uint8_t f_low_average_word_length(char str_in[])
 
     for (i = 0; i <= strlen(str_in); i++) {
         /* if end-of-str or current char is punctuation or white-space */
-        if (i == strlen(str_in) || ispunct(str_in[i]) || isspace(str_in[i])) {
+        if (i == strlen(str_in) || _char_is_punct_or_space(str_in[i])) {
             /* add word_length to sum, increase word_count, and reset word_length */
             if (word_length > 0) {
                 word_length_sum += word_length;
@@ -96,7 +127,7 @@ uint8_t f_low_average_word_length(char str_in[])
  * Checks if headline is less than 40 characters long.
  */
 
-uint8_t f_is_short(char str_in[])
+uint8_t _feature_is_short(char str_in[])
 {
     return strlen(str_in) < MIN_TOTAL_LENGTH;
 }
@@ -106,29 +137,9 @@ uint8_t f_is_short(char str_in[])
  * Checks if headline contains special punctuation, ! ?
  */
 
-uint8_t f_special_punctuation(char str_in[])
+uint8_t _feature_special_punctuation(char str_in[])
 {
     return strpbrk(str_in, "!?") != NULL;
-}
-
-
-/**
- * Checks if headline contains quotation
- */
-
-uint8_t f_quotation(char str_in[])
-{
-    return strpbrk(str_in, "\"'") != NULL;
-}
-
-
-/**
- * Checks if headline contains a colon, :
- */
-
-uint8_t f_colon(char str_in[])
-{
-    return strpbrk(str_in, ":") != NULL;
 }
 
 
@@ -136,7 +147,7 @@ uint8_t f_colon(char str_in[])
  * Checks if headline contains special forward-referencing words.
  */
 
-uint8_t f_special_words(char str_in[])
+uint8_t _feature_special_words(char str_in[])
 {
     char* words[AMOUNT_OF_SPECIAL_WORDS] = {
         "sådan", "derfor", "denne", "dette", "her", "så meget", "så lidt"
@@ -149,7 +160,7 @@ uint8_t f_special_words(char str_in[])
  * Checks if headline contains pronouns.
  */
 
-uint8_t f_pronouns(char str_in[])
+uint8_t _feature_pronouns(char str_in[])
 {
     char *words[AMOUNT_OF_PRONOUNS] = {
         "du", "han", "hun", "hende", "din", "jeg", "os", "de", "min", "dit"
@@ -162,7 +173,7 @@ uint8_t f_pronouns(char str_in[])
  * Checks if headline contains more than 2 stop-words.
  */
 
-uint8_t f_stop_words(char str_in[])
+uint8_t _feature_stop_words(char str_in[])
 {
     char *words[AMOUNT_OF_STOP_WORDS] = {
         "og", "i", "at", "det", "er", "en", "på", "til", "med", "af", "ikke", "med", "til"
@@ -175,7 +186,7 @@ uint8_t f_stop_words(char str_in[])
  * Checks if headline contains adverbs ending in 'lig' or 'lige'.
  */
 
-uint8_t f_adverbs(char str_in[])
+uint8_t _feature_adverbs(char str_in[])
 {
     return _match_end_of_word( str_in, "lig") || _match_end_of_word( str_in, "lige");
 }
@@ -185,7 +196,7 @@ uint8_t f_adverbs(char str_in[])
  * Checks if headline contains a number.
  */
 
-uint8_t f_no_numbers(char str_in[])
+uint8_t _feature_no_numbers(char str_in[])
 {
 	return strpbrk(str_in, "0123456789") == NULL;
 }
@@ -195,7 +206,7 @@ uint8_t f_no_numbers(char str_in[])
  * Checks if headline contains CAPS word longer than 3 characters
  */
 
-uint8_t f_caps(char str_in[])
+uint8_t _feature_caps(char str_in[])
 {
     int i, caps_length = 0, curr_length = 0;
 
@@ -273,6 +284,10 @@ uint8_t _match_end_of_word( char *str, char *word )
 }
 
 
+/**
+ * Match a word with conditions for the char before and after
+ */
+
 uint8_t _match_word_condition(char str[], char word[], int (*comp_before)(int), int (*comp_after)(int))
 {
     char *ret = strstr(str, word);
@@ -293,6 +308,9 @@ uint8_t _match_word_condition(char str[], char word[], int (*comp_before)(int), 
 
     return 0;
 }
+
+
+
 
 int _char_is_punct_or_space(int c)
 {

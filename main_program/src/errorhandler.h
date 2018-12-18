@@ -6,8 +6,8 @@
 #include <string.h>
 #include <errno.h>
 
-void error(char *msg);
-void fatal(char *msg);
+void error(char *);
+void fatal(char *);
 void fatal_error(void);
 
 #endif

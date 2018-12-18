@@ -1,5 +1,15 @@
 #include "interface.h"
 
+#define CLI_BUFFER_SIZE 1024
+#define CLI_ARG_SIZE 128
+#define CLI_DELIMITER " \t\r\n"
+
+/* internal functions */
+static void _run_shell_loop(Commands);
+static int _run_command(const char *, const char **, Commands);
+static char** _parse_argv(char *);
+
+
 /**
  * Initializes the command line interface.
  * 
@@ -7,17 +17,17 @@
  * @param argv  array of arguments
  */
 
-void cli_init(int argc, const char **argv)
+void interface_init(int argc, const char **argv)
 {
-    Commands cmdset = import_commands();
+    Commands cmdset = commands_import();
 
     /* only one argument (the executed path) */
     if (argc == 1)
         /* continuous shell-like loop */
-        _cli_loop(cmdset);
+        _run_shell_loop(cmdset);
     else
         /* run the command given as the first argument */
-        _cli_run_command(argv[1], argv, cmdset);
+        _run_command(argv[1], argv, cmdset);
 }
 
 
@@ -25,7 +35,7 @@ void cli_init(int argc, const char **argv)
  * Runs a shell-like loop, taking commands until 'exit' is entered or control+c pressed.
  */
 
-void _cli_loop(Commands cmdset)
+void _run_shell_loop(Commands cmdset)
 {
     int running;
     char line[CLI_BUFFER_SIZE], **argv;
@@ -42,7 +52,7 @@ void _cli_loop(Commands cmdset)
         argv = _parse_argv(line);
 
         /* run command parsed */
-        running = _cli_run_command(argv[1], (const char**)argv, cmdset);
+        running = _run_command(argv[1], (const char**)argv, cmdset);
     }
     while(running);
 }
@@ -52,7 +62,7 @@ void _cli_loop(Commands cmdset)
  * Run a command.
  */
 
-int _cli_run_command(const char *command, const char **argv, Commands cmdset)
+int _run_command(const char *command, const char **argv, Commands cmdset)
 {
     int i;
 

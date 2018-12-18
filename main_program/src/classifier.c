@@ -1,5 +1,12 @@
 #include "classifier.h"
 
+/* internal functions */
+static void _score_headline(Headline *, FeatureSet);
+static uint8_t _get_feature_vector(char *, FeatureSet);
+static double _calculate_prob_score(uint8_t, FeatureSet);
+static double _prob_given_not_feature(double, double);
+
+
 /**
  * Classify a dataset.
  * 
@@ -8,12 +15,12 @@
  * @param threshold     the threshold to classify by
  */
 
-void classify_dataset(DataSet dataset, FeatureSet featureset, double threshold)
+void classifier_classify_dataset(DataSet dataset, FeatureSet featureset, double threshold)
 {
     uint16_t i;
 
     for ( i = 0; i < dataset.count; i++ ) {
-        classify(dataset.data + i, featureset, threshold);
+        classifier_classify_headline(dataset.data + i, featureset, threshold);
     }
 }
 
@@ -26,7 +33,7 @@ void classify_dataset(DataSet dataset, FeatureSet featureset, double threshold)
  * @param threshold     the threshold to classify by
  */
 
-int8_t classify(Headline *headline, FeatureSet featureset, double threshold)
+int8_t classifier_classify_headline(Headline *headline, FeatureSet featureset, double threshold)
 {
     /* set probability score */
     _score_headline(headline, featureset);
@@ -45,7 +52,7 @@ int8_t classify(Headline *headline, FeatureSet featureset, double threshold)
  * @param featureset    a trained set of features
  */
 
-void score_dataset(DataSet dataset, FeatureSet featureset)
+void classifier_score_dataset(DataSet dataset, FeatureSet featureset)
 {
     uint16_t i;
 
@@ -62,7 +69,7 @@ void score_dataset(DataSet dataset, FeatureSet featureset)
  * @param featureset    a trained set of features
  */
 
-double calculate_threshold(DataSet dataset, FeatureSet featureset)
+double classifier_calculate_threshold(DataSet dataset, FeatureSet featureset)
 {
     int i, count_cb = 0, count_ncb = 0;
     double threshold = 0.5, prob_score, *cb_probs, *ncb_probs;

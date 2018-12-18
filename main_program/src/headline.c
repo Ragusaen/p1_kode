@@ -1,6 +1,14 @@
 #include "headline.h"
 
-DataSet import_headline_csv(char file_path[])
+#define FILE_BUFFER_LENGTH 256
+
+/* internal functions */
+static int _count_headlines(FILE *);
+static void _read_headlines(FILE *, DataSet);
+static void _parse_headline(Headline *, char *, char *);
+
+
+DataSet headline_import_dataset(char file_path[])
 {
     FILE *fp;
     DataSet dataset;
