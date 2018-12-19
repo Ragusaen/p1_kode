@@ -1,5 +1,5 @@
-#ifndef HEADLINE_H
-#define HEADLINE_H
+#ifndef DATASET_H
+#define DATASET_H
 
 #include <stdio.h>
 #include <stdlib.h>
