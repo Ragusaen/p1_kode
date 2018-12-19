@@ -5,6 +5,3 @@ main_program/bin/*
 *.exe
 *.bin
 *.csv
-*.srctrlbm
-*.srctrldb
-*.srctrlprj
