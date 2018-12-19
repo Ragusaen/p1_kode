@@ -8,7 +8,7 @@
 #include "features.h"
 
 
-int train_import_features(FeatureSet *);
+int train_load_features(FeatureSet *);
 FeatureSet train_features(DataSet);
 
 

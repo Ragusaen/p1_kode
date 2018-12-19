@@ -1,0 +1,56 @@
+DIRECTORY LIST FOR classifier-project
+=====================================
+
+/
+classifier.config
+compile.bat                     -- compile from windows
+compile_sh.sh                   -- compile from linux
+DIRLIST.txt
+README.md
+run-all.bat                     -- run all main commands using default values
+run.bat                         -- run program
+
+/bin/                           // Compiled program and other binaries
+    classifier.exe
+    trainedfeatures.bin
+
+/data/                          // Data sets
+    test.dataset
+    training.dataset
+
+/include/core/                  // header files for core modules
+        classifier.h
+        features.h
+        headline.h
+        test.h
+        train.h
+
+/include/ext/                   // header files for extensions
+        double.h
+
+/include/io/                    // header files for IO modules
+        commands.h
+        config.h
+        errorhandler.h
+        interface.h
+        print.h
+
+/src/                           // source files
+    main.c                      
+
+/src/core/                      // core modules
+        classifier.c
+        features.c
+        headline.c
+        test.c
+        train.c
+
+/src/ext/                       // extensions
+        double.c
+
+/src/io/                        // IO modules
+        commands.c
+        config.c
+        errorhandler.c
+        interface.c
+        print.c

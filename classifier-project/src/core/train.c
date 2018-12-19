@@ -5,7 +5,7 @@
 /* internal function */
 static void _add_feature_count(Headline, FeatureSet);
 static void _calculate_feature_probabilities(Feature *, int);
-static int _export_binary(FeatureSet);
+static int _save_binary(FeatureSet);
 static void _copy_feature(Feature *, Feature);
 
 
@@ -15,7 +15,7 @@ static void _copy_feature(Feature *, Feature);
  * @param featureset    a pointer to a featureset
  */
 
-int train_import_features(FeatureSet *featureset)
+int train_load_features(FeatureSet *featureset)
 {
     int i;
     FILE *fp;
@@ -64,7 +64,7 @@ FeatureSet train_features(DataSet dataset)
         _calculate_feature_probabilities(featureset.features + i, dataset.count);
     }
 
-    _export_binary(featureset);
+    _save_binary(featureset);
 
     return featureset;
 }
@@ -111,7 +111,7 @@ void _calculate_feature_probabilities(Feature *feature, int data_count)
  * Save trained features to binary file
  */
 
-int _export_binary(FeatureSet featureset)
+int _save_binary(FeatureSet featureset)
 {
     int i;
     FILE *fp;

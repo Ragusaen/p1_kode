@@ -1,3 +1,39 @@
+# Commands
+
+#### train [path]
+Train features on training set (path optional, if in config)
+
+| Flag | Action |
+| --- | --- |
+| --print | print trained features |
+
+#### test [path]
+Run evaluation on test set (path optional, if in config)
+
+| Flag | Action |
+| --- | --- |
+| --print | print evaluation data |
+| --save [path] | export CSV data |
+
+#### threshold [number]
+Get saved threshold, number only used if flags set
+
+| Flag | Action |
+| --- | --- |
+| --calc | calculate optimal threshold
+| --from [dataset] | either 'test' (default) or 'training' |
+| --print | print confusion matrix based on threshold |
+| --save | save threshold to config |
+ 
+#### classify "text"
+Classify a single headline (text)
+
+| Flag | Action |
+| --- | --- |
+| --threshold [n] | set new threshold (n) |
+
+
+
 # Dataset information
 
 TOTAL 474, TRAINING 332 (70.04%), TEST 142 (29.96%)

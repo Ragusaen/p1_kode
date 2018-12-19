@@ -165,7 +165,6 @@ double _calculate_prob_score(uint8_t feature_vector, FeatureSet featureset)
  * p(CB|!F)
  */
 
-double _prob_given_not_feature(double pcbf, double pf)
-{
+double _prob_given_not_feature(double pcbf, double pf) {
     return ( 0.5 - pcbf * pf ) / ( 1 - pf );
 }

@@ -128,7 +128,7 @@ int _command_test(const char **argv)
         return 1;
 
     /* load trained features */
-    if (!train_import_features(&trained_features)) {
+    if (!train_load_features(&trained_features)) {
         error("Features not trained");
         return 1;
     }
@@ -175,7 +175,7 @@ int _command_threshold(const char **argv)
 
     /* only load test dataset and trained features if necessary */
     if ((_flag_set(argv, "--calc") != -1 || _flag_set(argv, "--print") != -1) &&
-        (!_load_dataset(argv, &dataset, 0) || !train_import_features(&trained_features)))
+        (!_load_dataset(argv, &dataset, 0) || !train_load_features(&trained_features)))
         return 1;
 
     if (_flag_set(argv, "--calc") != -1) {
@@ -228,7 +228,7 @@ int _command_classify(const char **argv)
     i = _flag_set(argv, "--threshold");
 
     if (!_is_value(argv[2]) ||
-        !train_import_features(&trained_features) ||
+        !train_load_features(&trained_features) ||
         (threshold = _get_threshold(argv, i != -1 ? (i+1) : -1)) == -1)
         return 1;
 
