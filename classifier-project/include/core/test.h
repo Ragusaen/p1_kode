@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "io/errorhandler.h"
-#include "headline.h"
+#include "dataset.h"
 #include "classifier.h"
 
 

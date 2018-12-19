@@ -1,4 +1,4 @@
-#include "core/headline.h"
+#include "core/dataset.h"
 
 #define FILE_BUFFER_LENGTH 256
 
@@ -8,7 +8,7 @@ static void _read_headlines(FILE *, DataSet);
 static void _parse_headline(Headline *, char *, char *);
 
 
-int headline_import_dataset(char file_path[], DataSet *dataset)
+int dataset_import(char file_path[], DataSet *dataset)
 {
     FILE *fp;
 

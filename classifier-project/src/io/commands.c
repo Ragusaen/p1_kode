@@ -268,7 +268,7 @@ int _load_dataset_from_arg(const char **argv, DataSet *dataset, char *config_key
         return 0;
     }
 
-    return headline_import_dataset(filename, dataset);
+    return dataset_import(filename, dataset);
     printf("Imported \"%s\", with %d records.\n", filename, dataset->count);
 }
 
@@ -292,7 +292,7 @@ int _load_dataset(const char **argv, DataSet *dataset, int force_training)
         return 0;
     }
 
-    return headline_import_dataset(filename, dataset);
+    return dataset_import(filename, dataset);
 }
 
 

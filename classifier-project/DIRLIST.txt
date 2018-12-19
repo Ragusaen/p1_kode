@@ -21,7 +21,7 @@ run.bat                         -- run program
 /include/core/                  // header files for core modules
         classifier.h
         features.h
-        headline.h
+        dataset.h
         test.h
         train.h
 
@@ -41,7 +41,7 @@ run.bat                         -- run program
 /src/core/                      // core modules
         classifier.c
         features.c
-        headline.c
+        dataset.c
         test.c
         train.c
 

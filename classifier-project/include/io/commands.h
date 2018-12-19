@@ -9,7 +9,7 @@
 #include "config.h"
 #include "print.h"
 #include "core/classifier.h"
-#include "core/headline.h"
+#include "core/dataset.h"
 #include "core/features.h"
 #include "core/train.h"
 #include "core/test.h"
