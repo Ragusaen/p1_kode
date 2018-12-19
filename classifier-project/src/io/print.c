@@ -32,9 +32,8 @@ void print_command_list(void)
     printf(
         "threshold [number]\tGet saved threshold, number only used if flags set\n"
         "\n"
-        "\tSubr.:\t--calc:           calculate optimal threshold\n"
-        "\n"
-        "\tFlags:\t--from [dataset]: either 'test' (default) or 'training'\n"
+        "\tFlags:\t--calc:           calculate optimal threshold\n"
+        "\t      \t--from [dataset]: either 'test' (default) or 'training'\n"
         "\t      \t--print:          print confusion matrix based on threshold\n"
         "\t      \t--save:           save threshold to config\n"
     );
