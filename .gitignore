@@ -2,5 +2,9 @@
 main_program/bin/*
 *.o
 *.h.gch
+*.exe
 *.bin
 *.csv
+*.srctrlbm
+*.srctrldb
+*.srctrlprj
