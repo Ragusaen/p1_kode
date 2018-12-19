@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "io/errorhandler.h"
-#include "features.h"
 
 
 typedef struct Headline {
