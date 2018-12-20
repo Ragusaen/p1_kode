@@ -1,5 +1,5 @@
 .vscode
-main_program/bin/*
+classifier-project/bin/*
 *.o
 *.h.gch
 *.exe
