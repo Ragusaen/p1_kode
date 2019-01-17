@@ -5,3 +5,6 @@
 [submodule "clickbait-label-system"]
 	path = clickbait-label-system
 	url = https://github.com/mholdg16/clickbait-label-system.git
+[submodule "p1_presentation"]
+	path = p1_presentation
+	url = https://github.com/mholdg16/p1_presentation.git
